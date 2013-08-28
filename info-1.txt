@@ -1,3 +1,15 @@
 Voi incepe o serie de articole in care voi povesti cum lucrez in Lisp la un site. Vreau sa fac macar un articol pe saptamana. Pentru setarea mediului de lucru Common Lisp vezi articolul anterior, in care vezi cum se seteaza pe un Raspberry Pi si poti extrapola pentru un PC obisnuit.
 
-Site-ul despre care vorbesc este despre masini. In el vei putea sa faci diverse cautari despre masini noi, dupa diverse criterii, ideea de baza fiind sa ajut pe cineva care cauta o masina noua sa-si gaseasca un model cat mai apropiat de ce are nevoie.
+Site-ul despre care vorbesc este despre masini. In el vei putea sa faci diverse cautari despre masini noi, dupa diverse criterii gen capacitate cilindrica, numar de usi sau tip combustibil, ideea de baza fiind sa ajut pe cineva care cauta o masina noua sa-si gaseasca un model cat mai apropiat de ce are nevoie.
+
+Il fac in Common Lisp pentru a invata mai bine acest limbaj de programare. Probabil or sa apara multe greseli, pentru ca nu am experienta in CL.
+
+Pentru inceput, recomand urmatoarele carti care se gasesc la liber pe net:
+- "Practical Common Lisp" de Peter Seibel, carte foarte buna pentru incepatori in care se explica si aspecte teoretice dar se arata si punerea lor in aplicare
+- "On Lisp" de Paul Graham, carte dedicata in mare parte studiului macrourilor, necesita o minima pregatire
+- "Let Over Lambda" de Doug Hoyte, in care sunt explicate alte tehnici de macrouri
+
+OK, sa trecem la treaba!
+
+---------------------------
+
