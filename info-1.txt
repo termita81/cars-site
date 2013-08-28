@@ -1,0 +1,3 @@
+Voi incepe o serie de articole in care voi povesti cum lucrez in Lisp la un site. Vreau sa fac macar un articol pe saptamana. Pentru setarea mediului de lucru Common Lisp vezi articolul anterior, in care vezi cum se seteaza pe un Raspberry Pi si poti extrapola pentru un PC obisnuit.
+
+Site-ul despre care vorbesc este despre masini. In el vei putea sa faci diverse cautari despre masini noi, dupa diverse criterii, ideea de baza fiind sa ajut pe cineva care cauta o masina noua sa-si gaseasca un model cat mai apropiat de ce are nevoie.
