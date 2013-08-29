@@ -1,24 +1,30 @@
-Voi incepe o serie de articole in care voi povesti cum lucrez in Lisp la un site. Vreau sa fac macar un articol pe saptamana. Pentru setarea mediului de lucru Common Lisp vezi articolul anterior, in care vezi cum se seteaza pe un Raspberry Pi si poti extrapola pentru un PC obisnuit.
+Voi incepe o serie de articole in care voi povesti cum lucrez in Lisp la un site. Vreau sa fac macar un articol pe saptamana. Pentru setarea mediului de lucru Common Lisp vezi aici: http://razvanpopa.blogspot.ro/2013/01/instalare-clozure-common-lisp-pe.html cum se seteaza pe un Raspberry Pi si poti extrapola pentru un PC obisnuit.
 
-Site-ul despre care vorbesc este despre masini. In el vei putea sa faci diverse cautari despre masini noi, dupa diverse criterii gen capacitate cilindrica, numar de usi sau tip combustibil, ideea de baza fiind sa ajut pe cineva care cauta o masina noua sa-si gaseasca un model cat mai apropiat de ce are nevoie.
+In primul rand, trebuie sa fie instalate Emacs, Quicklisp si o implementare de Common Lisp - eu folosesc Clozure Common Lisp (CCL).
 
-Il fac in Common Lisp pentru a invata mai bine acest limbaj de programare. Probabil or sa apara multe greseli, pentru ca nu am experienta in CL.
+Asadar, pornesc Emacs, M-x slime <RET>, si deschid fisierul lucru.lisp (C-x C-f lucru.lisp <RET>).
+Mini-terminologie Emacs:
+- ceea ce in mod normal se numeste window/fereastra, in Emacs este frame, si contine ferestre Emacs, bara de meniu si alte alea
+- in acest frame poti sa ai mai multe ferestre Emacs
+- in fiecare fereastra Emacs editezi un singur buffer, care poate sa fie continutul unui fisier de pe disc sau pur si simplu niste text
+Deci Emacs are un frame mare, in care pot fi vizibile mai multe ferestre.
 
-Pentru inceput, recomand urmatoarele carti care se gasesc la liber pe net:
-- "Practical Common Lisp" de Peter Seibel, carte foarte buna pentru incepatori in care se explica si aspecte teoretice dar se arata si punerea lor in aplicare; PCL
-- "On Lisp" de Paul Graham, carte dedicata in mare parte studiului macrourilor, necesita o minima pregatire; OL
-- "Let Over Lambda" de Doug Hoyte, in care sunt explicate alte tehnici de macrouri; LOL
+Cu Emacs lucrez in felul urmator: C-x 1 pe o fereastra o face sa ocupe tot  frame-ul Emacs, apoi C-x 2 sau C-x 3 imparte fereastra in 2 pe orizontala, respectiv pe verticala. In una din ferestre acum pot sa apas C-x <stanga> sau C-x <dreapta> pentru a cicla intre bufferele deschise. Astfel, imi pastrez REPL-ul Common Lisp intr-unul din buffere si in celalalt vad fisierul deschis, in cazul de fata lucru.lisp. Intre cele doua ferestre ma misc cu C-x o. In fereastra non-REPL evaluez expresii cu C-x e la finalul expresiei. C-M k sterge expresia curenta. C-M e si C-M a se misca intre expresii, adica inainte si inapoi. C-a si C-e muta cursorul la inceputul, respectiv la sfarsitul liniei curente.
+Daca apare o eroare (controlul se muta intr-o fereastra cu o lista de optiuni numerotate - restart-uri, urmata de o lista de apeluri de functii numerotate in sens invers - stiva de apeluri) cea mai usoara cale de a scapa de ea este sa apas q (quit).
+
+
+Carti despre Common Lisp, disponibile pe net:
+- "Practical Common Lisp" de Peter Seibel, carte foarte buna pentru incepatori in care se explica si aspecte teoretice dar se arata si punerea lor in aplicare; gratuita la http://gigamonkeys.com/book/; [PCL]
+- "On Lisp" de Paul Graham, carte dedicata in mare parte studiului macrourilor, necesita o minima pregatire; http://www.paulgraham.com/onlisptext.html; [OL]
+- "Let Over Lambda" de Doug Hoyte, in care sunt explicate alte tehnici de macrouri; http://letoverlambda.com/index.cl/toc; [LOL]
 
 OK, sa trecem la treaba!
 
 ---------------------------
-
-Vreau sa am mai multe colectii de date. Vreau sa am modele de masini, fiecare masina avand atributele sale proprii. Atributele sa nu fie chiar la liber, ci sa fie luate dintr-o alta colectie. Eventual la un moment dat sa pun si niste tipuri pe atribute.
-
-In primul rand, trebuie sa fie instalat Quicklisp. Voi lucra in Emacs. Asadar, pornesc Emacs, M-x slime <RET>, si deschid fisierul lucru.lisp (C-x C-f lucru.lisp <RET>).
-
-Cu Emacs lucrez in felul urmator: C-x 1 pe un buffer il face sa ocupe toata fereastra Emacs, apoi C-x 2 sau C-x 3 imparte fereastra in 2 pe orizontala, respectiv pe verticala. In unul din buffere acum pot sa apas C-x <stanga> sau C-x <dreapta> pentru a cicla intre bufferele deschise. Astfel, imi pastrez REPL-ul Common Lisp intr-unul din buffere si in celalalt vad fisierul deschis. Intre cele doua buffere ma misc cu C-x o. In buffer non-REPL evaluez expresii cu C-x e la finalul expresiei. C-M k sterge expresia curenta. C-M e si C-M a se misca intre expresii, adica inainte si inapoi. C-a si C-e muta cursorul la inceputul, respectiv la sfarsitul liniei curente.
-Daca apare o eroare (controlul se muta intr-un buffer cu o lista de optiuni numerotate - restart-uri, urmata de o lista de apeluri de functii numerotate in sens invers - stiva de apeluri) cea mai usoara cale de a scapa de ea este sa apas q (quit).
+Ce vreau sa obtin?
+---------------------------
+Vreau sa fac un site despre masini. In el vei putea sa faci diverse cautari despre masini noi, dupa diverse criterii gen capacitate cilindrica, numar de usi sau tip combustibil, ideea de baza fiind sa ajut pe cineva care cauta o masina noua sa-si gaseasca un model cat mai apropiat de ce are nevoie.
+Vreau sa am mai multe colectii de date. Vreau sa am modele de masini, fiecare masina avand atributele sale proprii. Atributele sa nu fie chiar la liber, sa nu poti introduce ca si caracteristica a vehiculului orice text, ci sa fie restrictionate la un anumit set, pastrat intr-o alta colectie. Eventual la un moment dat sa pun si niste tipuri pe atribute.
 
 In prima faza incarc cateva biblioteci si creez pachetul in care voi lucra. Un pachet este o colectie de simboluri, faptul ca imi scriu codul intr-un pachet este oarecum echivalent cu a scrie intr-un namespace in C#. 
 <pre>
@@ -62,7 +68,7 @@ Am definit si o clasa de obiecte, attribute, care are 3 campuri momentan:
 - id care poate fi initializat la crearea instantei, dar daca nu se intampla lucrul acesta isi ia el automat valoarea apeland get-next-attribute-id
 - type care este implicit 'string
 
-In Common Lisp exista un sistem de obiecte care se numeste CLOS (Common Lisp Object System). Cu acesta se pot crea sabloane de obiecte (clase) si instante de obiecte (entitati concrete create conform sablonului). Clasele pot contine sloturi, similare campurilor din limbajele obisnuite de programare. Metodele sunt implementate "in afara claselor" ca functii generice care sunt apoi specializate pe baza tipurilor parametrilor. Pentru detalii mai multe vezi capitolele 16 si 17, care se refera la CLOS, din PCL.
+In Common Lisp exista un sistem de obiecte care se numeste CLOS (Common Lisp Object System). Cu acesta se pot crea sabloane de obiecte (clase) si instante de obiecte (entitati concrete create conform sablonului). Clasele pot contine sloturi, similare campurilor din limbajele obisnuite de programare. Metodele sunt implementate "in afara claselor" ca functii generice care sunt apoi specializate pe baza tipurilor parametrilor. Pentru detalii mai multe vezi capitolele 16 si 17, care se refera la CLOS, din [PCL].
 
 <pre>
 (add-attribute (make-instance 'attribute :name "Capacitate cilindrica"))
