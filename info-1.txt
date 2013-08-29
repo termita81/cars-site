@@ -46,23 +46,32 @@ Pun niste "infrastructura" pentru atribute:
 (defun get-next-attribute-id ()
   (incf *attribute-ids*))
 
-(defun find-attribute-by-name (name)
-  (find name *all-attributes* :test #'(lambda (to-find item) (string= (name item) to-find))))
+(defclass attribute ()
+  ((name :initarg :name :initform (error "What is the attribute's name?") :accessor name)
+   (id :initarg :id :initform (get-next-attribute-id) :reader id)
+   (type :initarg :type :initform 'string :accessor type)))
 
 (defun add-attribute (att)
   "Should check for existing attribute"
     (if (find-attribute-by-name (name att))
         (error "There is already an attribute by this name"))
     (push att *all-attributes*)
-  	att)	
+  	att)
 
-(defclass attribute ()
-  ((name :initarg :name :initform (error "What is the attribute's name?") :accessor name)
-   (id :initarg :id :initform (get-next-attribute-id) :reader id)
-   (type :initarg :type :initform 'string :accessor type)))
+(defun find-attribute-by-name (name)
+  (find name *all-attributes* :test #'(lambda (to-find item) (string= (name item) to-find))))
 
+(defun search-attribute-by-name (partial-name)
+  (loop
+    for a in *all-attributes*
+    when
+      (search partial-name (name a) :test #'string-equal)
+    collect a))
 </pre> 
-*all-attributes* este colectia de atribute. *attribute-id* este ca o secventa, va genera id-urile atributelor atunci cand acestea sunt adaugate in colectie. get-next-attribute-id preia urmatorul id de atribut. find-attribute-by-name cauta un atribut dupa un nume. add-attribute adauga un atribut nou, daca nu exista deja unul cu acelasi nume. 
+*all-attributes* este colectia de atribute. *attribute-id* este ca o secventa, va genera id-urile atributelor atunci cand acestea sunt adaugate in colectie. Aceste doua variabile, fiind definite cu defparameter si respectiv defvar, sunt variabile speciale si pot fi accesate din orice punct din program.
+
+get-next-attribute-id returneaza urmatorul id de atribut. find-attribute-by-name cauta precis un atribut dupa un nume iar search-attribute-by-name cauta dupa portiuni din nume. Diferenta de test la cele doua functii de cautare provine din faptul ca find-... are ca argument numele exact al atributului, iar search-... poate sa primeasca si un string cu alta capitalizare decat numele real al atributului. add-attribute adauga un atribut nou, daca nu exista deja unul cu acelasi nume.
+
 Am definit si o clasa de obiecte, attribute, care are 3 campuri momentan:
 - name care trebuie sa fie initializat la crearea instantei, altfel va rezulta o eroare/conditie
 - id care poate fi initializat la crearea instantei, dar daca nu se intampla lucrul acesta isi ia el automat valoarea apeland get-next-attribute-id
@@ -75,5 +84,35 @@ In Common Lisp exista un sistem de obiecte care se numeste CLOS (Common Lisp Obj
 (add-attribute (make-instance 'attribute :name "Numar usi"))
 (add-attribute (make-instance 'attribute :name "Forma"))
 (add-attribute (make-instance 'attribute :name "Tip combustibil"))
+(add-attribute (make-instance 'attribute :name "Culoare"))
 </pre>
 Am adaugat un numar minim de atribute. make-instance creeaza o instanta noua de clasa, aici se pot introduce initarg-uri, similare cu parametrii constructorilor din alte limbaje de programare.
+ 
+Similar voi proceda si pentru masini:
+<pre>
+(defparameter *all-cars* nil)
+
+(defvar *car-ids* 0)
+
+(defun get-next-car-id ()
+  (incf *car-ids*))
+
+(defclass car ()
+  ((name :initarg :name :initform (error "What is the car's name?") :accessor name)
+   (id :initarg :id :initform (get-next-car-id) :reader id) ; does it need initarg?
+   (attributes :initform '())))
+
+(defun add-car (car)
+  (push car *all-cars*)
+  car)
+
+(defun find-car (i)
+  "Finds a car by its id"
+  (find i *all-cars* :test #'(lambda (to-find y) (= (id y) to-find))))
+
+(add-car (make-instance 'car :name "Volkswagen Golf 4 1.9 TDI 90CP"))
+(add-car (make-instance 'car :name "Mazda 3 1.6 105CP"))
+(add-car (make-instance 'car :name "Dacia Duster Laureate 1.5 dCi 110CP"))
+
+</pre>
+Am adaugat variabila *all-cars* in care voi stoca toate obiectele masina, definite prin clasa car. 
