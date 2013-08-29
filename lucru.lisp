@@ -67,7 +67,7 @@
   "Query all cars that meet certain criteria; the criteria should be a list of pairs (attribute_id, attribute_value), but I'm not checking this ATM"
   nil)
 
-(add-car (make-instance 'car :name "Logan Preference 1.4 MPI"))
-(add-car (make-instance 'car :name "Cordoba Vario Sport 1.9 TDI 110CP"))
-(add-car (make-instance 'car :name "Duster Something 1.5 dCi 110CP"))
+(add-car (make-instance 'car :name "Volkswagen Golf 4 1.9 TDI 90CP"))
+(add-car (make-instance 'car :name "Mazda 3 1.6 105CP"))
+(add-car (make-instance 'car :name "Dacia Duster Laureate 1.5 dCi 110CP"))
 
