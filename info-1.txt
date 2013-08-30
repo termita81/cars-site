@@ -63,10 +63,10 @@ pachet este oarecum echivalent cu a scrie intr-un namespace in C#.
 <pre>
 (ql:quickload '(:hunchentoot))
 
-(defpackage :cars
+(defpackage :cars-site
     (:use :cl :hunchentoot))
 
-(in-package :cars)
+(in-package :cars-site)
 </pre>
 Functia in-package face ca pachetul respectiv sa devina curent.
 
@@ -82,7 +82,7 @@ Pun niste "infrastructura" pentru atribute:
 (defclass attribute ()
   ((name :initarg :name :initform (error "Attribute's name?") :accessor name)
    (id :initarg :id :initform (get-next-attribute-id) :reader id)
-   (type :initarg :type :initform 'string :accessor type)))
+   (att-type :initarg :type :initform 'string :accessor att-type)))
 
 (defun add-attribute (att)
   "Should check for existing attribute"
@@ -143,18 +143,18 @@ constructorilor din alte limbaje de programare.
  
 Similar voi proceda si pentru masini:
 <pre>
+(defclass vehicle ()
+  ((name :initarg :name :initform (error "What is the vehicle's name?") 
+	 :accessor name)
+   (id :initarg :id :initform (get-next-car-id) :reader id)
+   (attributes :initform '())))
+
 (defparameter *all-vehicles* nil)
 
 (defvar *vehicle-ids* 0)
 
 (defun get-next-vehicle-id ()
   (incf *vehicle-ids*))
-
-(defclass vehicle ()
-  ((name :initarg :name :initform (error "What is the vehicle's name?") 
-	 :accessor name)
-   (id :initarg :id :initform (get-next-car-id) :reader id)
-   (attributes :initform '())))
 
 (defun add-vehicle (vehicle)
   (push vehicle *all-vehicles*)
