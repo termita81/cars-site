@@ -1,10 +1,14 @@
 (ql:quickload '(:hunchentoot))
 
-(defpackage :cars
+(defpackage :cars-site
     (:use :cl :hunchentoot))
 
-(in-package :cars)
+(in-package :cars-site)
 
+(defclass attribute ()
+  ((name :initarg :name :initform (error "What is the attribute's name?") :accessor name)
+   (id :initarg :id :initform (get-next-attribute-id) :reader id)
+   (att-type :initarg :type :initform 'string :accessor att-type)))
 
 (defparameter *all-attributes* nil)
 
@@ -30,11 +34,6 @@
        (search partial-name (name a) :test #'string-equal) 
      collect a))
 
-(defclass attribute ()
-  ((name :initarg :name :initform (error "What is the attribute's name?") :accessor name)
-   (id :initarg :id :initform (get-next-attribute-id) :reader id)
-   (type :initarg :type :initform 'string :accessor type)))
-
 (add-attribute (make-instance 'attribute :name "Capacitate cilindrica"))
 (add-attribute (make-instance 'attribute :name "Numar usi"))
 (add-attribute (make-instance 'attribute :name "Forma"))
@@ -43,31 +42,31 @@
 
 
 
-(defparameter *all-cars* nil)
-
-(defvar *car-ids* 0)
-
-(defun get-next-car-id ()
-  (incf *car-ids*))
-
-(defclass car ()
-  ((name :initarg :name :initform (error "What is the car's name?") :accessor name)
-   (id :initarg :id :initform (get-next-car-id) :reader id) ; does it need initarg?
+(defclass vehicle ()
+  ((name :initarg :name :initform (error "What is the vehicle's name?") :accessor name)
+   (id :initarg :id :initform (get-next-vehicle-id) :reader id) ; does it need initarg?
    (attributes :initform '())))
 
-(defun add-car (car)
-  (push car *all-cars*)
-  car)
+(defparameter *all-vehicles* nil)
 
-(defun find-car (i)
-  "Finds a car by its id"
-  (find i *all-cars* :test #'(lambda (to-find y) (= (id y) to-find))))
+(defvar *vehicle-ids* 0)
 
-(defun query-cars (criteria) 
-  "Query all cars that meet certain criteria; the criteria should be a list of pairs (attribute_id, attribute_value), but I'm not checking this ATM"
+(defun get-next-vehicle-id ()
+  (incf *vehicle-ids*))
+
+(defun add-vehicle (vehicle)
+  (push vehicle *all-vehicles*)
+  vehicle)
+
+(defun find-vehicle (i)
+  "Finds a vehicle by its id"
+  (find i *all-vehicles* :test #'(lambda (to-find y) (= (id y) to-find))))
+
+(defun query-vehicles (criteria) 
+  "Query all vehicles that meet certain criteria; the criteria should be a list of pairs (attribute_id, attribute_value), but I'm not checking this ATM"
   nil)
 
-(add-car (make-instance 'car :name "Volkswagen Golf 4 1.9 TDI 90CP"))
-(add-car (make-instance 'car :name "Mazda 3 1.6 105CP"))
-(add-car (make-instance 'car :name "Dacia Duster Laureate 1.5 dCi 110CP"))
+(add-vehicle (make-instance 'vehicle :name "Volkswagen Golf 4 1.9 TDI 90CP"))
+(add-vehicle (make-instance 'vehicle :name "Mazda 3 1.6 105CP"))
+(add-vehicle (make-instance 'vehicle :name "Dacia Duster Laureate 1.5 dCi 110CP"))
 
