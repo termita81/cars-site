@@ -101,10 +101,10 @@
 (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Tip combustibil" "Benzina")
 (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Capacitate cilindrica" "1595")
 (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Numar usi" "3")
-(set-attribute-on-vehicle (nth 0 *all-vehicles*) "Culoare" "Blue beton")
+(set-attribute-on-vehicle (nth 1 *all-vehicles*) "Culoare" "Blue beton")
 
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Forma" "Break")
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Tip combustibil" "Motorina")
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Capacitate cilindrica" "1896")
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Numar usi" "5")
-(set-attribute-on-vehicle (ntg 2 *all-vehicles*) "Culoare" "Bleumarin plictisitor")
+(set-attribute-on-vehicle (nth 2 *all-vehicles*) "Culoare" "Bleumarin plictisitor")
