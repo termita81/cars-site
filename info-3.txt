@@ -1,0 +1,8 @@
+Acum avem create functii care sa adauge vehicule si atribute noi,
+sa seteze si sa preia atribute de pe vehicule.
+Avem chiar si o functie care sa caute acele vehicule care indeplinesc
+anumite conditii (ma rog, atributele lor).
+Pare ca sunt multe fire pe-afara, lucru care nu ma incanta, 
+asa ca modificam pe ici pe colo.
+
+Nu vad de ce as avea nevoie de acces la 
