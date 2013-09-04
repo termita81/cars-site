@@ -19,8 +19,8 @@
 	  :test #'(lambda (to-find item) (string= (name item) to-find))))
   (defun add-attribute (att)
     (if (find-attribute-by-name (name att))
-	(error "Atributul cu acest nume este deja introdus"))
-    (push att all-attributes)
+	(error "Atributul cu acest nume este deja introdus")
+	(push att all-attributes))
     att)
   (defun search-attribute-by-name (partial-name)
     (loop 
@@ -42,11 +42,16 @@
      (attributes :initform '()))))
 
 (let (all-vehicles)  
-  (defun add-vehicle (vehicle)
-    (push vehicle all-vehicles)
-    vehicle)
-  (defun find-vehicle (i)
+  (defun find-vehicle-by-id (i)
     (find i all-vehicles :test #'(lambda (to-find y) (= (id y) to-find))))
+  (defun find-vehicle-by-name (name)
+    (find name all-vehicles 
+	  :test #'(lambda (to-find item) (string= (name item) to-find))))
+  (defun add-vehicle (vehicle)
+    (if (find-vehicle-by-name (name vehicle))
+	(error "Vehiculul cu acest nume este deja introdus!")
+	(push vehicle all-vehicles))
+    vehicle)
   (defun set-attribute-on-vehicle (vehicle att-name att-value)
     (if (find-attribute-by-name att-name)
 	(setf 
@@ -86,26 +91,28 @@
   
   (add-vehicle (make-instance 'vehicle :name "Volkswagen Golf 4 1.9 TDI 90CP"))
   (add-vehicle (make-instance 'vehicle :name "Mazda 3 1.6 105CP"))
-  (add-vehicle (make-instance 'vehicle :name "Dacia Duster Laureate 1.5 dCi 110CP")))
+  (add-vehicle (make-instance 'vehicle :name "Dacia Duster Laureate 1.5 dCi 110CP"))
+
+  (setf v (nth 0 (get-all-vehicles)))
+  (set-attribute-on-vehicle v "Forma" "SUV")
+  (set-attribute-on-vehicle v "Tip combustibil" "Motorina")
+  (set-attribute-on-vehicle v "Capacitate cilindrica" "1495")
+  (set-attribute-on-vehicle v "Numar usi" "5")
+  (set-attribute-on-vehicle v "Culoare" "Bej special")
   
-(progn
-  (set-attribute-on-vehicle (nth 0 *all-vehicles*) "Forma" "SUV")
-  (set-attribute-on-vehicle (nth 0 *all-vehicles*) "Tip combustibil" "Motorina")
-  (set-attribute-on-vehicle (nth 0 *all-vehicles*) "Capacitate cilindrica" "1495")
-  (set-attribute-on-vehicle (nth 0 *all-vehicles*) "Numar usi" "5")
-  (set-attribute-on-vehicle (nth 0 *all-vehicles*) "Culoare" "Bej special")
+  (setf v (nth 1 (get-all-vehicles)))
+  (set-attribute-on-vehicle v "Forma" "Hatchback")
+  (set-attribute-on-vehicle v "Tip combustibil" "Benzina")
+  (set-attribute-on-vehicle v "Capacitate cilindrica" "1595")
+  (set-attribute-on-vehicle v "Numar usi" "3")
+  (set-attribute-on-vehicle v "Culoare" "Blue beton")
   
-  (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Forma" "Hatchback")
-  (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Tip combustibil" "Benzina")
-  (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Capacitate cilindrica" "1595")
-  (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Numar usi" "3")
-  (set-attribute-on-vehicle (nth 1 *all-vehicles*) "Culoare" "Blue beton")
-  
-  (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Forma" "Break")
-  (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Tip combustibil" "Motorina")
-  (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Capacitate cilindrica" "1896")
-  (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Numar usi" "5")
-  (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Culoare" "Bleumarin plictisitor"))
+  (setf v (nth 2 (get-all-vehicles)))
+  (set-attribute-on-vehicle v "Forma" "Break")
+  (set-attribute-on-vehicle v "Tip combustibil" "Motorina")
+  (set-attribute-on-vehicle v "Capacitate cilindrica" "1896")
+  (set-attribute-on-vehicle v "Numar usi" "5")
+  (set-attribute-on-vehicle v "Culoare" "Bleumarin plictisitor"))
 
 
 ; print-vehicle
@@ -118,11 +125,9 @@
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
 
 #| Cum printeaza un vehicul functia de mai sus; arata urat, dar merge momentan
-CARS-SITE> (print-vehicle (car a))
+CARS-SITE> (print-vehicle (nth 0 (get-all-vehicles)))
 Vehicul cu id 3: Dacia Duster Laureate 1.5 dCi 110CP
 (culoare: beige special
- culoare: blue beton
- culoare: beige special
  numar usi: 5
  capacitate cilindrica: 1495
  tip combustibil: motorina

@@ -1,8 +1,22 @@
-Acum avem create functii care sa adauge vehicule si atribute noi,
-sa seteze si sa preia atribute de pe vehicule.
-Avem chiar si o functie care sa caute acele vehicule care indeplinesc
-anumite conditii (ma rog, atributele lor).
-Pare ca sunt multe fire pe-afara, lucru care nu ma incanta, 
-asa ca modificam pe ici pe colo.
+Acum avem create functii care sa adauge vehicule si atribute noi, sa seteze 
+si sa preia atribute de pe vehicule. Avem chiar si o functie care sa caute 
+acele vehicule care indeplinesc anumite conditii (ma rog, atributele lor).
+Pare ca sunt multe fire pe-afara, lucru care nu ma incanta, asa ca modificam 
+pe ici pe colo.
 
-Nu vad de ce as avea nevoie de acces la 
+Nu vad de ce as avea nevoie de acces direct la variabilele care contin id-ul
+curent de secventa, asa ca transform definitiile de clase, inchizand peste
+variabilele respective.
+
+La fel, in mod normal nu cred ca o sa am nevoie sa accesez direct colectiile
+de obiecte (atat vehicule cat si atribute) asa ca transform si functiile 
+celelalte in inchideri peste colectii.
+
+Explicatie - daca definesc o variabila speciala cu DEFPARAMETER sau DEFVAR, 
+pot sa o accesez de oriunde din program, iar lucrul asta s-ar putea sa nu fie 
+optim. Asa ca mai bine fac variabila sa fie lexicala, o definesc intr-un LET
+si apoi in corpul LET-ului definesc cu DEFUN functiile mele. Asta o sa faca
+toate acele functii sa salveze legatura catre variabila respectiva si sa aiba 
+acces la ea, fara ca alte functii sa poata face acest lucru. Pentru convenienta
+am lasat si cate o functie care sa returneze variabila respectiva, dar functia
+respectiva NU va fi acolo cand programul este pus in productie.
