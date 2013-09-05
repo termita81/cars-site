@@ -142,7 +142,3 @@ Am si initializat vehiculele cu niste valori:
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Numar usi" "5")
 (set-attribute-on-vehicle (nth 2 *all-vehicles*) "Culoare" "Bleumarin plictisitor")
 </pre>
-
-Revin data viitoare. Incepe sa mi se para o idee buna TDD. Si sa-mi miroasa 
-tare ciudat niste chestii facute pe aici. Asta inseamna ca o sa fie loc de
-refactorizari! :)
