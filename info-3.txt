@@ -20,3 +20,92 @@ toate acele functii sa salveze legatura catre variabila respectiva si sa aiba
 acces la ea, fara ca alte functii sa poata face acest lucru. Pentru convenienta
 am lasat si cate o functie care sa returneze variabila respectiva, dar functia
 respectiva NU va fi acolo cand programul este pus in productie.
+
+Functia FORMAT
+Este folosita pentru a scrie diverse chestii, cred ca poate fi asemanata cu printf.
+Primeste ca parametri:
+- destinatia
+- un sir de caractere de control
+- alte argumente interpretate cu ajutorul directivelor din parametrul 2; aceste
+argumente pot fi consumate sau nu de directive, adica, daca ne imaginam o sageata
+care indica argumentul curent, aceasta sageata poate sa avanseze sau nu in functie
+de directiva 
+
+Destinatia poate fi:
+- nil - pentru a scrie intr-un string pe care-l si returneaza
+- t - pentru a scrie in stream-ul *STANDARD-OUTPUT*, si returneaza nil
+- un stream sau un string cu pointer de umplere (fill pointer)
+
+Sirul de caractere de control este un program in limbajul FORMAT. Seamana oarecum
+cu sirul de formatare din printf, macar ca idee daca nu si ca sintaxa. Este alcatuit
+din caractere obisnuite, interpretate ad-literam, amestecate cu directive care pot consuma
+din argumentele de dupa sir si care incep cu tilda (~) si se termina cu un caracter 
+care identifica directiva (poate fi scris cu litera mare sau mica), iar in mijloc 
+pot sa mai aiba alti parametri prefix:
+- numere scrise in baza 10
+- v - specifica sa se foloseasca parametrul urmator din sirul de control
+- # - numara cati parametri mai sunt in sirul de control, fara sa consume vreunul
+- caractere citate cu ')
+
+<pre>
+(format t "~$" pi) ==> 3.14
+(format t "~5$" pi) ==> 3.14159
+(format t "~v$" 3 pi) ==> 3.142
+(format t "~#$" pi) ==> 3.1
+</pre>
+
+Daca o directiva accepta doi parametri prefix si vrei sa-l dai doar pe al doilea, 
+pe primul il scrii ca ",".
+
+Mai exista modificatorii ":" si "@", care sunt plasati dupa parametrii oprefix
+dar inainte de caracterul de identificare al directivei si modifica modul de 
+functionare a directivei in feluri mai subtile. De exemplu, pentru directiva ~D
+care scrie numere in baza 10, ":" specifica separarea numarului in grupe de cate trei,
+iar "@" pune semnul:
+<pre>
+(format t "~d" 1000000) ==> 1000000
+(format t "~:d" 1000000) ==> 1,000,000
+(format t "~@d" 1000000) ==> +1000000
+(format t "~:@d" 1000000) ==> +1,000,000
+</pre>
+
+Directive:
+~A - consuma un parametru si il scrie "estetic" (aesthetic), adica sirurile sunt scrise
+fara ghilimele sau secvente escape, iar numerele intr-un mod natural.
+<pre>
+(format t "~a are ~a mere" "Ana" 3) ==> Ana are 3 mere
+</pre>
+
+~S - seamana cu A, doar ca incearca sa scrie datele a.i. sa poata fi citite inapoi de reader,
+adica sirurile vor fi incadrate in ghilimele, simbolurile vor avea numele pachetului in fata etc
+
+~% - emite linie noua
+~& - emite linie noua doar daca nu se afla la inceputul liniei
+Amandoua primesc un parametru prefix numeric care specifica numarul de linii dorit
+
+~c - emite caractere si poate sa consume doar caractere ca argument. Poate fi 
+modificata cu ":" pentru a scrie numele caracterului si cu "@" pentru a emite
+caracterul in sintaxa speciala Lisp:
+<pre>
+(format t "~c" #\Newline) ==> ; scrie doar o linie noua
+(format t "~:c" #\Newline) ==> Newline
+(format t "~@c" #\Newline) ==> #\Newline
+</pre>
+
+~D, ~X, ~O, ~B, ~R - caractere de scriere de numere intregi. Primesc modificatori:
+- : - adauga virgule
+- @ - printeaza semnul totdeauna
+si parametri prefix:
+- primul specifica latimea minima
+- al doilea specifica un caracter de umplere, implicit fiind spatiu si adaugandu-se 
+inaintea numarului
+- al treilea, folosit impreuna cu ":", specifica ce caracter sa fie separator
+- al patrulea, tot impreuna cu ":", specifica numarul de caractere pe grup
+<pre>
+(format t "~,,'.,4:@d" 10000000000) ==>  +100.0000.0000
+</pre>
+Directivele astea specifica baza in care sa fie printat numarul, deci aroganta maxima:
+<pre>
+(format t "~23@:r" 10000000000) ==> +2L,CFD,6FG
+</pre>
+Ha. Ha. Ha.
