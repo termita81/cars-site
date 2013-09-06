@@ -127,7 +127,7 @@
 #| Cum printeaza un vehicul functia de mai sus; arata urat, dar merge momentan
 CARS-SITE> (print-vehicle (nth 0 (get-all-vehicles)))
 Vehicul cu id 3: Dacia Duster Laureate 1.5 dCi 110CP
-(culoare: beige special
+(culoare: bej special
  numar usi: 5
  capacitate cilindrica: 1495
  tip combustibil: motorina
