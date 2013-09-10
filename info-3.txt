@@ -222,3 +222,43 @@ argumente sarite, sau "@" pentru a specifica saltul incepand de la elementul zer
 
 ~/ - permite apelarea de functii arbitrare pentru a procesa argumentele lui FORMAT
 
+
+Daca tot am scris despre diverse chestii de "infrastructura", o sa scriu cateva 
+randuri si despre
+
+
+HUNCHENTOOT (http://weitz.de/hunchentoot/)
+
+Hunchentoot este un server de web care stie SSL si alte cateva chestii. Te lasa
+sa raspunzi la cereri HTTP in orice fel vrei tu, permitandu-ti accesul la
+header-ele HTTP. Poate folosi fire de executie (thread-uri) acolo unde acestea
+sunt suportate, prin biblioteca Bordeaux Threads. Ar trebui sa functioneze fara
+probleme pe implementari decente de Common Lisp; pe CCL, SBCL si LispWorks sigur
+merge, doar ca pe Windows este posibil sa ai nevoie de OpenSSL instalat.
+Hunchentoot se instaleaza foarte lejer cu Quicklisp, de aceea si prima linie
+din lucru.lisp:
+<pre>
+(ql:quickload '(:hunchentoot))
+</pre>
+
+Cum lucrezi cu Hunchentoot? il pornesti si apoi adaugi niste request handlere.
+In timp ce el asculta pe portul pe care il pui tu, cand primeste o cerere,
+se uita intr-o lista de functii care specifica pentru ce URL-uri raspund. 
+Daca vreuna din acele functii returneaza un handler (care este la randul sau
+o functie) atunci acest handler va fi folosit pentru a genera raspunsul catre
+client.
+
+<pre>
+(defparameter *server-web* 
+  (make-instance 'hunchentoot:easy-acceptor :port 8080))
+(start *server-web*)
+</pre>
+Am definit o variabila speciala pe care o initializez cu o instanta de acceptor
+Hunchentoot. Acest acceptor va asculta pe portul TCP 8080. O pornesc cu metoda
+start. Directorul de documente din care va servi cererile in mod implicit este
+www din directorul in care a fost instalat:
+~/quicklisp/dists/quicklisp/software/hunchentoot-####/www
+
+Daca vrei mai mult decat doar sa servesti fisiere statice poti sa extinzi 
+clasa acceptor, sa folosesti niste biblioteci de generare HTML gen CL-WHO,
+HTML-TEMPLATE, ceva biblioteci de Javascript gen Parenscript. Eu asa o sa fac.
