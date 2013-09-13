@@ -135,3 +135,8 @@ Vehicul cu id 3: Dacia Duster Laureate 1.5 dCi 110CP
 )
 NIL
 |#
+
+
+(defparameter *web* (make-instance 'easy-acceptor :port 8080))
+(start *web*)
+
