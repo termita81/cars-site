@@ -10,26 +10,50 @@ Functionalitate: momentan va fi doar un camp text pentru parola, si un buton
 de submit. Inca nu avem utilizatori, deci daca ajungi la pagina respectiva
 nu poti sa vrei decat sa fii admin. Va fi pusa la adresa /login si va fi 
 submisa la acelasi URL, prin POST, urmand ca in caz de succes sa redirecteze
-la /, iar in caz de eroare tot la /login, dar cu un mesaj de eroare
+la /, iar in caz de eroare tot la /login, dar cu un mesaj de eroare.
 
 Fisier: login.tmpl
 Ca sa exersam CL-WHO, il voi scrie utilizand aceasta biblioteca:
 <pre>
-(cl-who:with-html-output (*standard-output*)
-  (:html 
-    (:head (:title "Login"))
-    (:body
-      "<!-- TMPL_IF error -->"
-       (:div :style "color: red;" "Parola gresita")
+(ql:quickload 'cl-who)
+
+(with-open-file (g "login.tmpl" :direction :output 
+		   :if-exists :supersede :if-does-not-exist :create)
+  (cl-who:with-html-output (g nil :indent t)
+    (:html 
+     (:head (:title "Login"))
+     (:body
+      "<!-- TMPL_IF wrong-password -->"
+      (:div :style "color: red;" "Parola gresita")
       "<!-- /TMPL_IF -->"
       (:form :action "/login" :method "POST"
-        (:input :type "password" :name "pwd")
-	(:br)
-	(:input :type "submit" :value "OK")))))
+	     (:input :type "password" :name +PASSWORD-POST-PARAMETER+)
+	     (:br)
+	     (:input :type "submit" :value "OK"))))))
 </pre>
-Rezulta
-<html><head><title>Login</title></head><body><!-- TMPL_IF error --><div style='color: red;'>Parola gresita</div><!-- /TMPL_IF --><form action='/login' method='POST'><input type='password' name='pwd' /><br /><input type='submit' value='OK' /></form></body></html>
-text pe care-l voi salva in fisierul login.tmpl. Ulterior, il voi procesa cu HTML-TEMPLATE.
+Rezulta un fisier login.tmpl care are continutul:
+<html>
+  <head>
+    <title>Login
+    </title>
+  </head>
+  <body><!-- TMPL_IF error -->
+    <div style='color: red;'>Parola gresita
+    </div><!-- /TMPL_IF -->
+    <form action='/login' method='POST'>
+      <input type='password' name='pwd' />
+      <br />
+      <input type='submit' value='OK' />
+    </form>
+  </body>
+</html>
+Ulterior, acest template va fi procesat cu HTML-TEMPLATE. Acum modificam si 
+prima linie din fisier, pentru a incarca de la inceput si bibliotecile CL-WHO
+si HTML-TEMPLATE.
 
-Trebuie creata functia de procesare. Aceasta se va uita daca exista sesiune; daca da, atunci afiseaza un mesaj
-si un link catre pagina principala, altfel afiseaza 
+Trebuie creata functia de procesare. Aceasta se va uita daca exista sesiune; 
+daca da, atunci va redirecta catre pagina principala (/), altfel afiseaza 
+formularul de autentificare.
+
+<pre>
+</pre>

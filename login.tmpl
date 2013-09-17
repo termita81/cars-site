@@ -1,1 +1,16 @@
-<html><head><title>Login</title></head><body><!-- TMPL_IF error --><div style='color: red;'>Parola gresita</div><!-- /TMPL_IF --><form action='/login' method='POST'><input type='password' name='pwd' /><br /><input type='submit' value='OK' /></form></body></html>
+
+<html>
+  <head>
+    <title>Login
+    </title>
+  </head>
+  <body><!-- TMPL_IF wrong-password -->
+    <div style='color: red;'>Parola gresita
+    </div><!-- /TMPL_IF -->
+    <form action='/login' method='POST'>
+      <input type='password' name='pwd' />
+      <br />
+      <input type='submit' value='OK' />
+    </form>
+  </body>
+</html>

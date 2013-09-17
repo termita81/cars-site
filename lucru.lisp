@@ -1,7 +1,7 @@
-(ql:quickload '(:hunchentoot))
+(ql:quickload '(:hunchentoot :html-template))
 
 (defpackage :cars-site
-    (:use :cl :hunchentoot))
+    (:use :cl :hunchentoot :html-template))
 
 (in-package :cars-site)
 
@@ -124,19 +124,36 @@
 	     for att in (slot-value vehicle 'attributes)
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
 
-#| Cum printeaza un vehicul functia de mai sus; arata urat, dar merge momentan
-CARS-SITE> (print-vehicle (nth 0 (get-all-vehicles)))
-Vehicul cu id 3: Dacia Duster Laureate 1.5 dCi 110CP
-(culoare: bej special
- numar usi: 5
- capacitate cilindrica: 1495
- tip combustibil: motorina
- forma: suv
-)
-NIL
-|#
-
-
+; pornesc server-ul web
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))
 (start *web*)
 
+
+
+; login
+(defconstant +COOKIE-NAME+ "ebwuoeir") ; abstract, nu spune nimic
+(defconstant +PASS+ "somepass") ; parola de admin :)
+(defconstant +PASSWORD-POST-PARAMETER+ "pwd")
+
+(defun is-logged-in ()
+  (cookie-in +COOKIE-NAME+))
+
+(defun web-login ()
+  (if (is-logged-in)
+      (redirect "/")
+      (let ((pass (post-parameter +PASSWORD-POST-PARAMETER+))
+	    (wrong nil))
+	(if pass
+	    (if (string= pass +PASS+)
+		(progn
+		  (set-cookie +COOKIE-NAME+ :value "t")
+		  (redirect "/"))
+		(setf wrong t)))
+	(with-output-to-string (s)
+	  (html-template:fill-and-print-template #p"c:/Users/rpopa/Documents/GitHub/cars-site/login.tmpl" '(:wrong-password wrong) :stream s)
+	  s))))
+
+(pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
+
+
+;  (format nil "~:[Nu ~;~]e logat" (is-logged-in)))
