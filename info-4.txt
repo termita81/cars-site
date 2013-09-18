@@ -48,12 +48,79 @@ Rezulta un fisier login.tmpl care are continutul:
   </body>
 </html>
 Ulterior, acest template va fi procesat cu HTML-TEMPLATE. Acum modificam si 
-prima linie din fisier, pentru a incarca de la inceput si bibliotecile CL-WHO
-si HTML-TEMPLATE.
+prima linie din fisier, pentru a incarca de la inceput si biblioteca HTML-TEMPLATE.
 
 Trebuie creata functia de procesare. Aceasta se va uita daca exista sesiune; 
 daca da, atunci va redirecta catre pagina principala (/), altfel afiseaza 
 formularul de autentificare.
-
+Intai definesc cativa parametri, momentan ca si constante (de vazut conventia
+de denumire cu numele incadrat intre "+" - fiind conventie, nu e obligatorie)
 <pre>
+(defconstant +COOKIE-NAME+ "ebwuoeir") ; abstract, nu spune nimic
+(defconstant +COOKIE-VALABILITY+ (* 60 60)) ; 1h
+(defconstant +PASS+ "somepass") ; parola de admin :)
+(defconstant +PASSWORD-POST-PARAMETER+ "pwd")
+(defconstant +TEMPLATE-ROOT+ "~/cars-site/")
 </pre>
+Apoi fac si o functie care sa returneze calea completa catre template-uri 
+atunci cand primeste un nume de template:
+<pre>
+(defun get-template (name)
+  (merge-pathnames name +TEMPLATE-ROOT+))
+</pre>
+Practic concateneaza +TEMPLATE-ROOT+ cu name, la modul "cale catre fisier" 
++ "fisier".
+
+Functia de procesare:
+<pre>
+(defun web-login ()
+  (if (cookie-in +COOKIE-NAME+)
+      (redirect "/")
+      (let ((pass (post-parameter +PASSWORD-POST-PARAMETER+))
+	    (wrong nil))
+	(if pass
+	    (if (string= pass +PASS+)
+		(progn
+		  (set-cookie +COOKIE-NAME+ :value t 
+		  :expires (+ +COOKIE-VALABILITY+ (get-universal-time)))
+		  (redirect "/"))
+		(setf wrong t)))
+	(with-output-to-string (s)
+	  (html-template:fill-and-print-template 
+	   (get-template "login.tmpl") 
+	   (list :wrong-password wrong) 
+	   :stream s)
+	  s))))
+</pre>
+Explicatii:
+- daca exista cookie, atunci utilizatorul este deja autentificat, redirect la /
+- altfel caut parametru "pwd" printre parametrii de post, incercand sa aflu
+  daca tocmai suntem in curs de logare
+- daca da, atunci verific daca parametrul respectiv contine parola si daca iara
+  da atunci setez un cookie si fac redirect la /
+- daca parola furnizata nu este corecta, setez un flag, wrong
+- pe care apoi il folosesc atunci cand "umplu" template-ul din login.tmpl
+Parola are valabilitate 1 ora, GET-UNIVERSAL-TIME ofera numarul de secunde 
+de la 1 ianuarie 1900, ora 00:00.
+
+La final nu trebuie decat sa spunem lui Hunchentoot sa foloseasca functia 
+WEB-LOGIN pentru a raspunde cererilor care vin la adresa /login.
+<pre>
+(pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
+</pre>
+Creem un dispatcher Hunchentoot pe baza de prefix si ii zicem sa serveasca
+cererile care vin la /login folosind functia WEB-LOGIN, apoi il adaugam in
+tabela de dispecerat. Destul de simplu, nu? se poate face similar un dispatcher
+care sa actioneze atunci cand exista o potrivire pe baza de regex, folosind
+CREATE-REGEX-DISPATCHER. 
+
+2. Pagina principala
+Acum ca am facut pagina de login imi dau seama ca in pagina principala trebuie
+sa existe o indicatie a faptului ca suntem sau nu logati. O sa lucrez simplu si 
+pun un text in titlu, gen [ ADMIN ].
+
+Functionalitate: in pagina principala vrem sa vedem vehiculele de pe site, 
+sa facem filtrarile, d-astea. Fiind pus pe chestii administrative, o s-o las
+mai la urma, acum doar afisez la gramada continutul "bazei de date" si pun
+un link catre pagina/paginile de administrare.
+

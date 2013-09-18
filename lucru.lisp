@@ -124,7 +124,7 @@
 	     for att in (slot-value vehicle 'attributes)
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
 
-; pornesc server-ul web
+; pornesc server-ul web, il tin minte in variabila speciala *web*
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))
 (start *web*)
 
@@ -132,25 +132,33 @@
 
 ; login
 (defconstant +COOKIE-NAME+ "ebwuoeir") ; abstract, nu spune nimic
+(defconstant +COOKIE-VALABILITY+ (* 60 60)) ; 1h
 (defconstant +PASS+ "somepass") ; parola de admin :)
 (defconstant +PASSWORD-POST-PARAMETER+ "pwd")
+(defconstant +TEMPLATE-ROOT+ "~/cars-site/")
 
-(defun is-logged-in ()
-  (cookie-in +COOKIE-NAME+))
+(defun get-template (name)
+  (merge-pathnames name +TEMPLATE-ROOT+))
+
+; asta il face pe Hunchentoot sa arunce erorile in debugger
+; (setf hunchentoot:*catch-errors-p* nil)
 
 (defun web-login ()
-  (if (is-logged-in)
+  (if (cookie-in +COOKIE-NAME+)
       (redirect "/")
       (let ((pass (post-parameter +PASSWORD-POST-PARAMETER+))
 	    (wrong nil))
 	(if pass
 	    (if (string= pass +PASS+)
 		(progn
-		  (set-cookie +COOKIE-NAME+ :value "t")
+		  (set-cookie +COOKIE-NAME+ :value t :expires (+ +COOKIE-VALABILITY+ (get-universal-time)))
 		  (redirect "/"))
 		(setf wrong t)))
 	(with-output-to-string (s)
-	  (html-template:fill-and-print-template #p"c:/Users/rpopa/Documents/GitHub/cars-site/login.tmpl" '(:wrong-password wrong) :stream s)
+	  (html-template:fill-and-print-template 
+	   (get-template "login.tmpl") 
+	   (list :wrong-password wrong) 
+	   :stream s)
 	  s))))
 
 (pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
