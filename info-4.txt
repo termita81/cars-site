@@ -124,3 +124,6 @@ sa facem filtrarile, d-astea. Fiind pus pe chestii administrative, o s-o las
 mai la urma, acum doar afisez la gramada continutul "bazei de date" si pun
 un link catre pagina/paginile de administrare.
 
+Faza e ca trebuie sa ma lupt un pic cu Hunchentoot, sa-l inteleg, ca sa pot
+sa tratez si cereri din astea, catre pagini "virtuale", cat si cereri catre
+fisiere de pe disc, gen favicon.ico. Revin.
