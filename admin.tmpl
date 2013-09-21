@@ -1,0 +1,48 @@
+<html>
+<head>
+<style type='text/css'>
+  .admin-container { overflow: auto; padding: 5px; width: 600px; height: 200px; background: #eee }
+</style>
+</head>
+<body>
+
+<!-- autovehicule -->
+Autovehicule:<br>
+<form action='/admin' method='GET'>
+<input type='text' id='vehicle' name='vehicle'>
+<input type='hidden' name='cmd' value='add-vehicle'>
+<input type='submit' value='Adauga vehicul'>
+</form>
+<div class='admin-container'>
+  <table>
+  <!-- TMPL_LOOP vehicles -->
+  <tr><td id='<!-- TMPL_VAR id -->'><!-- TMPL_VAR name --></td></tr>
+  <!-- /TMPL_LOOP -->
+  </table>
+</div>
+
+<br><br>
+
+
+<!-- atribute -->
+Atribute:<br>
+<form action='/admin' method='GET'>
+<input type='text' id='attribute' name='attribute'>
+<input type='hidden' name='cmd' value='add-attribute'>
+<input type='submit' value='Adauga atribut'>
+</form>
+<div class='admin-container'>
+  <table>
+  <!-- TMPL_LOOP attributes -->
+  <tr><td id='<!-- TMPL_VAR id -->'><!-- TMPL_VAR name -->: <!--TMPL_VAR att-type --></td></tr>
+  <!-- /TMPL_LOOP -->
+  </table>
+</div>
+
+<!-- atribute la vehicule -->
+<div class='admin-container' style='left: 630px; top: 50px; position: absolute; '>
+  
+</div>
+
+</body>
+</html>

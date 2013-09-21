@@ -131,27 +131,28 @@
 
 
 ; login
-(defconstant +COOKIE-NAME+ "ebwuoeir") ; abstract, nu spune nimic
-(defconstant +COOKIE-VALABILITY+ (* 60 60)) ; 1h
-(defconstant +PASS+ "somepass") ; parola de admin :)
-(defconstant +PASSWORD-POST-PARAMETER+ "pwd")
-(defconstant +TEMPLATE-ROOT+ "~/cars-site/")
+(defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, nu spune nimic
+(defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
+(defparameter *PASS* "somepass") ; parola de admin :)
+(defparameter *PASSWORD-POST-PARAMETER* "pwd")
+(defparameter *TEMPLATE-ROOT* "~/cars-site/")
 
 (defun get-template (name)
-  (merge-pathnames name +TEMPLATE-ROOT+))
+  (merge-pathnames name *TEMPLATE-ROOT*))
 
 ; asta il face pe Hunchentoot sa arunce erorile in debugger
 ; (setf hunchentoot:*catch-errors-p* nil)
 
+(pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
 (defun web-login ()
-  (if (cookie-in +COOKIE-NAME+)
+  (if (cookie-in *COOKIE-NAME*)
       (redirect "/")
-      (let ((pass (post-parameter +PASSWORD-POST-PARAMETER+))
+      (let ((pass (post-parameter *PASSWORD-POST-PARAMETER*))
 	    (wrong nil))
 	(if pass
-	    (if (string= pass +PASS+)
+	    (if (string= pass *PASS*)
 		(progn
-		  (set-cookie +COOKIE-NAME+ :value t :expires (+ +COOKIE-VALABILITY+ (get-universal-time)))
+		  (set-cookie *COOKIE-NAME* :value t :expires (+ *COOKIE-VALABILITY* (get-universal-time)))
 		  (redirect "/"))
 		(setf wrong t)))
 	(with-output-to-string (s)
@@ -161,7 +162,27 @@
 	   :stream s)
 	  s))))
 
-(pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
-
-
-;  (format nil "~:[Nu ~;~]e logat" (is-logged-in)))
+(pushnew (create-prefix-dispatcher "/admin" 'web-admin) *dispatch-table*)
+(defun web-admin ()
+  (let ((cmd (get-parameter "cmd")))
+    (cond
+      ((equal cmd "add-vehicle")
+       (let ((name (get-parameter "vehicle")))
+	 (add-vehicle (make-instance 'vehicle :name name))))
+      ((equal cmd "add-attribute")
+       (let ((name (get-parameter "attribute")))
+	 (add-attribute (make-instance 'attribute :name name))))
+      (t nil)))
+  (with-output-to-string (s)
+    (html-template:fill-and-print-template
+     (get-template "admin.tmpl")
+     (list :vehicles 
+	   (mapcar #'(lambda (x) 
+		       (list :id (id x) :name (name x))) 
+		   (get-all-vehicles))
+	   :attributes 
+	   (mapcar #'(lambda (x) 
+		       (list :id (id x) :name (name x) :att-type (att-type x))) 
+		   (get-all-attributes)))
+     :stream s)
+    s))
