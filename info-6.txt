@@ -1,0 +1,12 @@
+Aveam de gand sa fac o pagina meseriasa de administrare, dar m-am razgandit. Mai
+bine mai simpla si mai repede, decat mai complicata si sa o termin cine stie
+cand.
+Ca sa atasez atribute unor vehicule voi pune mai intai link-uri pe vehicule, 
+care sa deschida pagina de administrare avand vehiculul selectat undeva 
+in dreapta. Pentru asta voi defini o noua comanda, EDIT-VEHICLE. Fiind vorba de
+link-uri obisnuite, voi folosi parametri GET, spre deosebire de comenzile 
+ADD-VEHICLE si ADD-ATTRIBUTE, despre care am zis ca la un moment dat le voi
+schimba pe POST. Asa ca voi incerca sa preiau CMD atat din parametrii GET cat si
+din cei POST.
+
+12345678901234567890123456789012345678901234567890123456789012345678901234567890
