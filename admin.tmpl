@@ -16,7 +16,7 @@ Autovehicule:<br>
 <div class='admin-container'>
   <table>
   <!-- TMPL_LOOP vehicles -->
-  <tr><td id='<!-- TMPL_VAR id -->'><!-- TMPL_VAR name --></td></tr>
+  <tr><td id='<!-- TMPL_VAR id -->'><a href="/admin?cmd=edit-vehicle&id=<!-- TMPL_VAR id -->"><!-- TMPL_VAR name --></a></td></tr>
   <!-- /TMPL_LOOP -->
   </table>
 </div>
@@ -40,9 +40,26 @@ Atribute:<br>
 </div>
 
 <!-- atribute la vehicule -->
-<div class='admin-container' style='left: 630px; top: 50px; position: absolute; '>
-  
+<!-- TMPL_IF edit-vehicle -->
+<div class='admin-container' style='left: 630px; top: 50px; height: 600px; position: absolute; '>
+  <form action='admin' method=GET'>
+    <!-- TMPL_VAR edit-vehicle --><br>
+    <input type='hidden' name='cmd' value='set-attributes'>
+    <input type='hidden' name='id' value='<!--TMPL_VAR edit-vehicle-id -->'>
+    <br>
+    <table border=1>
+    <!-- TMPL_LOOP edit-vehicle-attrs -->
+    <tr>
+      <td><!-- TMPL_VAR att-name --></td>
+      <td><input type='text' name='<!--TMPL_VAR att-name -->' value='<!-- TMPL_VAR att-value -->'></td>
+    </tr>
+    <!-- /TMPL_LOOP -->
+    </table>
+    <br>
+    <input type='submit' value='Seteaza atribute'>
+  </form>
 </div>
+<!-- /TMPL_IF -->
 
 </body>
 </html>

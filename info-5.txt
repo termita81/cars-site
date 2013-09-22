@@ -155,7 +155,7 @@ Atribute:<br>
 </pre>
 
 Fisierul template arata urat. Pe langa asta, contine doua formulare, pentru
-adaugarea elementelor. Data viitoare va aparea si un formular pentru arasarea
+adaugarea elementelor. Data viitoare va aparea si un formular pentru atasarea
 de atribute vehiculelor, care va functiona la modul: dai clic pe un vehicul si
 vezi in partea dreapta toate atributele, cu cate o casuta in dreptul fiecaruia,
 in care sa poti sa scrii valoarea respectivului atribut. Cand dai submit,

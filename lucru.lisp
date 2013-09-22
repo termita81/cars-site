@@ -76,6 +76,8 @@
 		       (cdr crit-pair)))
 		  result)))
       result))
+  (defun get-vehicle-by-id (id)
+    (loop for v in all-vehicles when (= id (id v)) return v))
   (defun get-all-vehicles ()
     "Numai pentru debug"
     all-vehicles))
@@ -141,10 +143,14 @@
   (merge-pathnames name *TEMPLATE-ROOT*))
 
 ; asta il face pe Hunchentoot sa arunce erorile in debugger
-; (setf hunchentoot:*catch-errors-p* nil)
+(setf hunchentoot:*catch-errors-p* nil)
+
+; pentru debug: salveaza ultimul obiect REQUEST
+(defparameter *LAST-REQUEST* nil)
 
 (pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
 (defun web-login ()
+  (setf *LAST-REQUEST* *REQUEST*)
   (if (cookie-in *COOKIE-NAME*)
       (redirect "/")
       (let ((pass (post-parameter *PASSWORD-POST-PARAMETER*))
@@ -164,7 +170,11 @@
 
 (pushnew (create-prefix-dispatcher "/admin" 'web-admin) *dispatch-table*)
 (defun web-admin ()
-  (let ((cmd (get-parameter "cmd")))
+  (setf *LAST-REQUEST* *REQUEST*)
+  (let ((cmd (or (get-parameter "cmd")
+		  (post-parameter "cmd")))
+	(edit-vehicle)
+	(params))
     (cond
       ((equal cmd "add-vehicle")
        (let ((name (get-parameter "vehicle")))
@@ -172,17 +182,32 @@
       ((equal cmd "add-attribute")
        (let ((name (get-parameter "attribute")))
 	 (add-attribute (make-instance 'attribute :name name))))
-      (t nil)))
-  (with-output-to-string (s)
-    (html-template:fill-and-print-template
-     (get-template "admin.tmpl")
-     (list :vehicles 
-	   (mapcar #'(lambda (x) 
-		       (list :id (id x) :name (name x))) 
-		   (get-all-vehicles))
-	   :attributes 
-	   (mapcar #'(lambda (x) 
-		       (list :id (id x) :name (name x) :att-type (att-type x))) 
-		   (get-all-attributes)))
-     :stream s)
-    s))
+      ((equal cmd "edit-vehicle")
+       (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id")))))
+      ((equal cmd "set-attributes")
+       (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id"))))       
+       (loop for att in (get-all-attributes)
+	  do (set-attribute-on-vehicle edit-vehicle (name att) (get-parameter (name att)))))
+      (t nil))
+    (with-output-to-string (s)
+      (html-template:fill-and-print-template
+       (get-template "admin.tmpl")
+       `(:vehicles 
+	 ,(mapcar #'(lambda (x) 
+		      `(:id ,(id x) :name ,(name x))) 
+		  (get-all-vehicles))
+	 :attributes 
+	 ,(mapcar #'(lambda (x) 
+		      `(:id ,(id x) :name ,(name x) :att-type ,(att-type x))) 
+		  (get-all-attributes))
+	 ,@(when edit-vehicle		 
+		 `(:edit-vehicle ,(name edit-vehicle)
+		   :edit-vehicle-id ,(id edit-vehicle)
+		   :edit-vehicle-attrs
+		   ,(mapcar #'(lambda (x)
+			       `(:att-name ,(name x)
+					   :att-value ,(get-attribute-on-vehicle edit-vehicle (name x))))
+			   (get-all-attributes))))
+	 )
+       :stream s)
+       s)))
