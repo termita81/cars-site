@@ -11,7 +11,7 @@
   (defclass attribute ()
     ((name :initarg :name :initform (error "Care este numele atributului?") :accessor name)
      (id :initarg :id :initform (incf attribute-id-seq) :reader id)
-     (att-type :initarg :type :initform 'string :accessor att-type))))
+     (att-type :initarg :att-type :initform 'string :accessor att-type))))
 
 (let (all-attributes)
   (defun find-attribute-by-name (name)
@@ -52,14 +52,18 @@
 	(error "Vehiculul cu acest nume este deja introdus!")
 	(push vehicle all-vehicles))
     vehicle)
-  (defun set-attribute-on-vehicle (vehicle att-name att-value)
+  (defun set-attribute-on-vehicle (vehicle-id att-name att-value)
     (if (find-attribute-by-name att-name)
-	(setf 
-	 (slot-value vehicle 'attributes)
-	 (acons att-name att-value (slot-value vehicle 'attributes)))
+	(let ((vehicle (find-vehicle-by-id vehicle-id)))
+	  (when vehicle
+	    (setf 
+	     (slot-value vehicle 'attributes)
+	     (acons att-name att-value (slot-value vehicle 'attributes)))))
 	(error "Nu exista acest atribut!")))
-  (defun get-attribute-on-vehicle (vehicle att-name)
-    (let ((att (assoc att-name (slot-value vehicle 'attributes) :test #'string-equal)))
+  (defun get-attribute-on-vehicle (vehicle-id att-name)
+    (let* 
+	((vehicle (get-vehicle-by-id vehicle-id))
+	 (att (assoc att-name (slot-value vehicle 'attributes) :test #'string-equal)))
       (if att
 	  (cdr att)
 	  nil)))
@@ -72,7 +76,7 @@
 		 (remove-if-not 
 		  #'(lambda (vehicle) 
 		      (equalp 
-		       (get-attribute-on-vehicle vehicle (car crit-pair))
+		       (get-attribute-on-vehicle (id vehicle) (car crit-pair))
 		       (cdr crit-pair)))
 		  result)))
       result))
@@ -83,38 +87,39 @@
     all-vehicles))
 
 
-; date de test
-(progn
-  (add-attribute (make-instance 'attribute :name "Capacitate cilindrica"))
-  (add-attribute (make-instance 'attribute :name "Numar usi"))
-  (add-attribute (make-instance 'attribute :name "Forma"))
-  (add-attribute (make-instance 'attribute :name "Tip combustibil"))
-  (add-attribute (make-instance 'attribute :name "Culoare"))
-  
-  (add-vehicle (make-instance 'vehicle :name "Volkswagen Golf 4 1.9 TDI 90CP"))
-  (add-vehicle (make-instance 'vehicle :name "Mazda 3 1.6 105CP"))
-  (add-vehicle (make-instance 'vehicle :name "Dacia Duster Laureate 1.5 dCi 110CP"))
+; salveaza pe disc, sau incarca
+(defparameter *db* "cars-site-db")
+(defun persist-to-disk ()
+  (with-open-file (g (get-site-file *db*) :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (format g "~a" (serialize))))
+(defun serialize ()
+  "versiune penibila, dar functionala"
+  (with-output-to-string (s)
+    (format s "; atribute")
+    (loop for a in (get-all-attributes)
+	 do (format s "~%(add-attribute (make-instance 'attribute :name \"~a\" :id ~a :att-type '~a))"
+		    (name a)
+		    (id a)
+		    (att-type a)))
+    (format s "~%~%; vehicule")
+    (loop for v in (get-all-vehicles)
+	 do (format s "~%(add-vehicle (make-instance 'vehicle :name \"~a\" :id ~a))"
+		    (name v)
+		    (id v)))
+    (format s "~%~%; atributele vehiculelor")
+    (loop for v in (get-all-vehicles)
+	 do (loop for a in (get-all-attributes)
+	       do (let* ((id (id v))
+			 (name (name a))
+			 (val (get-attribute-on-vehicle id name)))
+		    (when (and val (not (equal "NIL" val)))
+		      (format s "~%(set-attribute-on-vehicle ~a \"~a\" \"~a\")" id name val)))))
+    s))
+(defun load-from-disk ()
+  (load "cars-site-db"))
 
-  (setf v (nth 0 (get-all-vehicles)))
-  (set-attribute-on-vehicle v "Forma" "SUV")
-  (set-attribute-on-vehicle v "Tip combustibil" "Motorina")
-  (set-attribute-on-vehicle v "Capacitate cilindrica" "1495")
-  (set-attribute-on-vehicle v "Numar usi" "5")
-  (set-attribute-on-vehicle v "Culoare" "Bej special")
-  
-  (setf v (nth 1 (get-all-vehicles)))
-  (set-attribute-on-vehicle v "Forma" "Hatchback")
-  (set-attribute-on-vehicle v "Tip combustibil" "Benzina")
-  (set-attribute-on-vehicle v "Capacitate cilindrica" "1595")
-  (set-attribute-on-vehicle v "Numar usi" "3")
-  (set-attribute-on-vehicle v "Culoare" "Blue beton")
-  
-  (setf v (nth 2 (get-all-vehicles)))
-  (set-attribute-on-vehicle v "Forma" "Break")
-  (set-attribute-on-vehicle v "Tip combustibil" "Motorina")
-  (set-attribute-on-vehicle v "Capacitate cilindrica" "1896")
-  (set-attribute-on-vehicle v "Numar usi" "5")
-  (set-attribute-on-vehicle v "Culoare" "Bleumarin plictisitor"))
+
+
 
 
 ; print-vehicle
@@ -125,6 +130,9 @@
 	  (loop 
 	     for att in (slot-value vehicle 'attributes)
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
+
+
+(load-from-disk)
 
 ; pornesc server-ul web, il tin minte in variabila speciala *web*
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))
@@ -137,10 +145,10 @@
 (defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
 (defparameter *PASS* "somepass") ; parola de admin :)
 (defparameter *PASSWORD-POST-PARAMETER* "pwd")
-(defparameter *TEMPLATE-ROOT* "~/cars-site/")
+(defparameter *SITE-ROOT* "~/Documents/GitHub/cars-site/")
 
-(defun get-template (name)
-  (merge-pathnames name *TEMPLATE-ROOT*))
+(defun get-site-file (name)
+  (merge-pathnames name *SITE-ROOT*))
 
 ; asta il face pe Hunchentoot sa arunce erorile in debugger
 (setf hunchentoot:*catch-errors-p* nil)
@@ -163,7 +171,7 @@
 		(setf wrong t)))
 	(with-output-to-string (s)
 	  (html-template:fill-and-print-template 
-	   (get-template "login.tmpl") 
+	   (get-site-file "login.tmpl") 
 	   (list :wrong-password wrong) 
 	   :stream s)
 	  s))))
@@ -173,8 +181,7 @@
   (setf *LAST-REQUEST* *REQUEST*)
   (let ((cmd (or (get-parameter "cmd")
 		  (post-parameter "cmd")))
-	(edit-vehicle)
-	(params))
+	(edit-vehicle))
     (cond
       ((equal cmd "add-vehicle")
        (let ((name (get-parameter "vehicle")))
@@ -188,10 +195,12 @@
        (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id"))))       
        (loop for att in (get-all-attributes)
 	  do (set-attribute-on-vehicle edit-vehicle (name att) (get-parameter (name att)))))
+      ((equal cmd "save-data")
+       (persist-to-disk))
       (t nil))
     (with-output-to-string (s)
       (html-template:fill-and-print-template
-       (get-template "admin.tmpl")
+       (get-site-file "admin.tmpl")
        `(:vehicles 
 	 ,(mapcar #'(lambda (x) 
 		      `(:id ,(id x) :name ,(name x))) 
@@ -206,8 +215,9 @@
 		   :edit-vehicle-attrs
 		   ,(mapcar #'(lambda (x)
 			       `(:att-name ,(name x)
-					   :att-value ,(get-attribute-on-vehicle edit-vehicle (name x))))
+					   :att-value ,(get-attribute-on-vehicle (id edit-vehicle) (name x))))
 			   (get-all-attributes))))
 	 )
        :stream s)
        s)))
+
