@@ -8,3 +8,40 @@ link-uri obisnuite, voi folosi parametri GET, spre deosebire de comenzile
 ADD-VEHICLE si ADD-ATTRIBUTE, despre care am zis ca la un moment dat le voi
 schimba pe POST. Asa ca voi incerca sa preiau CMD atat din parametrii GET cat si
 din cei POST.
+
+Am modificat atat template-ul, cat si codul din pagina de administrare.
+
+In template am adaugat link-uri de modificare pentru fiecare vehicul, plus un
+formular nou, care este vizibil numai atunci cand pagina de administrare
+primeste comenzile de editare sau de salvare.
+Formularul are doua campuri ascunse - numele comenzii si id-ul vehiculului.
+In rest, el contine toate atributele disponibile, si valorile lor pentru
+vehiculul selectat - deci este posibil sa existe atribute care sa nu aiba 
+valoare completata.
+
+<pre>
+
+</pre>
+
+Am adaugat apoi o functie noua, GET-VEHICLE-BY-ID, care returneaza un vehicul
+atunci cand primeste id-ul lui. Am setat CATCH-ERRORS-P din pachetul HUNCHENTOOT
+ca fiind T, astfel incat toate exceptiile pe care le primesc (in Common Lisp se 
+spune "toate conditiile semnalate") sa apara in debugger. Am adaugat o variabila
+speciala noua, *LAST-REQUEST*, in care sa se salveze ultima cerere - in timpul
+executiei metodelor din ACCEPTOR am acces la o variabila dinamica (e acelasi
+lucru cu "variabila speciala") care se numeste *REQUEST* si in care se gaseste
+obiectul cerere curent. Acum ma voi putea uita la cerere post-factum, si voi 
+putea folosi in REPL (linia de comanda, gen) metodele din ACCEPTOR.
+
+Am modificat destul de mult functia WEB-ADMIN. Am "dresat"-o sa se uite atat in
+parametrii GET cat si in POST dupa CMD.
+Se poate vedea acum ca este impartita in doua bucati: una in care proceseaza
+comenzile primite, si una in care face randarea - in cazul de fata grosul muncii
+este pregatirea listei de parametri. Ce facem cu informatia asta? momentan o
+pastram in minte, poate mai tarziu iese ceva util de aici.
+
+O chestie interesanta: in loc sa mai creez lista de variabile pe care o transmit
+lui FILL-AND-PRINT-TEMPLATE folosind functia LIST, acum folosesc BACKQUOTE (`),
+al carui rol este sa returneze parametrii trimisi ne-evaluati, cu exceptia 
+cazurilor cand acestia sunt precedati de virgula (,). Combinatiile dintre ` si ,
+pot fi si imbricate, pentru distractie sporita! :)
