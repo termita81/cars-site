@@ -126,7 +126,8 @@
     s))
 
 (defun persist-to-disk ()
-  (with-open-file (g (get-site-file *db*) :direction :output :if-exists :supersede :if-does-not-exist :create)
+  (with-open-file (g (get-site-file *db*) :direction :output 
+		     :if-exists :supersede :if-does-not-exist :create)
     (format g "~a" (serialize))))
 
 (defun load-from-disk ()
@@ -164,6 +165,8 @@
 (defun is-logged-in ()
   (cookie-in *COOKIE-NAME*))
 
+
+
 (pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
 (defun web-login ()
   (setf *LAST-REQUEST* *REQUEST*)
@@ -174,7 +177,8 @@
 	(if pass
 	    (if (string= pass *PASS*)
 		(progn
-		  (set-cookie *COOKIE-NAME* :value t :expires (+ *COOKIE-VALABILITY* (get-universal-time)))
+		  (set-cookie *COOKIE-NAME* :value t :expires 
+			      (+ *COOKIE-VALABILITY* (get-universal-time)))
 		  (redirect "/"))
 		(setf wrong t)))
 	(with-output-to-string (s)
@@ -234,3 +238,26 @@
        :stream s)
        s)))
 
+
+; mecanism... oarecum indoielnic
+; care sa trateze "/"
+; de ce indoielnic? parca nu-mi suna mie bine
+; dar ce vreau:
+; - anumite comenzi sa fie tratate speciale
+; - resursele statice sa fie servite
+; - / sa duca intr-o anumita pagina
+; - sa se genereze 404 pentru celelalte chestii, care nu intra aici
+; mecanismul asta permite indeplinirea acestor cerinte
+(pushnew 'root-dispatcher *dispatch-table*)
+
+(defun root-dispatcher (request)
+  (when (equalp (script-name request) "/")
+    #'root-handler))
+
+(defun root-handler ()
+  (with-output-to-string (s)
+    (html-template:fill-and-print-template
+     (get-site-file "index.tmpl")
+     `()
+     :stream s)
+    s))
