@@ -6,14 +6,12 @@
 (in-package :cars-site)
 
 ; atribute
-
-(let ((attribute-id-seq 0))
+(let ((all-attributes)
+      (attribute-id-seq 0))
   (defclass attribute ()
     ((name :initarg :name :initform (error "Care este numele atributului?") :accessor name)
      (id :initarg :id :initform (incf attribute-id-seq) :reader id)
-     (att-type :initarg :att-type :initform 'string :accessor att-type))))
-
-(let (all-attributes)
+     (att-type :initarg :att-type :initform 'string :accessor att-type)))
   (defun find-attribute-by-name (name)
     (find name all-attributes 
 	  :test #'(lambda (to-find item) (string= (name item) to-find))))
@@ -21,6 +19,8 @@
     (if (find-attribute-by-name (name att))
 	(error "Atributul cu acest nume este deja introdus")
 	(push att all-attributes))
+    (when (<= attribute-id-seq (id att))
+      (setf attribute-id-seq (1+ (id att))))
     att)
   (defun search-attribute-by-name (partial-name)
     (loop 
@@ -34,14 +34,12 @@
 
 
 ; vehicule
-
-(let ((vehicle-id-seq 0))
+(let ((all-vehicles)
+      (vehicle-id-seq 0))
   (defclass vehicle ()
     ((name :initarg :name :initform (error "Care este numele vehiculului?") :accessor name)
      (id :initarg :id :initform (incf vehicle-id-seq) :reader id)
-     (attributes :initform '()))))
-
-(let (all-vehicles)  
+     (attributes :initform '())))
   (defun find-vehicle-by-id (i)
     (find i all-vehicles :test #'(lambda (to-find y) (= (id y) to-find))))
   (defun find-vehicle-by-name (name)
@@ -51,6 +49,8 @@
     (if (find-vehicle-by-name (name vehicle))
 	(error "Vehiculul cu acest nume este deja introdus!")
 	(push vehicle all-vehicles))
+    (when (<= vehicle-id-seq (id vehicle))
+      (setf vehicle-id-seq (1+ (id vehicle))))
     vehicle)
   (defun set-attribute-on-vehicle (vehicle-id att-name att-value)
     (if (find-attribute-by-name att-name)
@@ -87,11 +87,20 @@
     all-vehicles))
 
 
-; salveaza pe disc, sau incarca
+(defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, nu spune nimic
+(defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
+(defparameter *PASS* "somepass") ; parola de admin :)
+(defparameter *PASSWORD-POST-PARAMETER* "pwd")
+(defparameter *SITE-ROOT* 
+  (if (equalp "Linux" (software-type))
+      "~/cars-site/"
+      "~/Documents/GitHub/cars-site/"))
 (defparameter *db* "cars-site-db")
-(defun persist-to-disk ()
-  (with-open-file (g (get-site-file *db*) :direction :output :if-exists :supersede :if-does-not-exist :create)
-    (format g "~a" (serialize))))
+
+(defun get-site-file (name)
+  (merge-pathnames name *SITE-ROOT*))
+
+; salveaza baza de date pe disc, sau o incarca
 (defun serialize ()
   "versiune penibila, dar functionala"
   (with-output-to-string (s)
@@ -99,7 +108,7 @@
     (loop for a in (get-all-attributes)
 	 do (format s "~%(add-attribute (make-instance 'attribute :name \"~a\" :id ~a :att-type '~a))"
 		    (name a)
-		    (id a)
+		    (id a)AL
 		    (att-type a)))
     (format s "~%~%; vehicule")
     (loop for v in (get-all-vehicles)
@@ -115,6 +124,11 @@
 		    (when (and val (not (equal "NIL" val)))
 		      (format s "~%(set-attribute-on-vehicle ~a \"~a\" \"~a\")" id name val)))))
     s))
+
+(defun persist-to-disk ()
+  (with-open-file (g (get-site-file *db*) :direction :output :if-exists :supersede :if-does-not-exist :create)
+    (format g "~a" (serialize))))
+
 (defun load-from-disk ()
   (load (get-site-file *db*)))
 
@@ -132,23 +146,14 @@
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
 
 
-(load-from-disk)
-
 ; pornesc server-ul web, il tin minte in variabila speciala *web*
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))
 (start *web*)
 
+; incarc baza de date de pe disc
+(load-from-disk)
 
 
-; login
-(defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, nu spune nimic
-(defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
-(defparameter *PASS* "somepass") ; parola de admin :)
-(defparameter *PASSWORD-POST-PARAMETER* "pwd")
-(defparameter *SITE-ROOT* "~/Documents/GitHub/cars-site/")
-
-(defun get-site-file (name)
-  (merge-pathnames name *SITE-ROOT*))
 
 ; asta il face pe Hunchentoot sa arunce erorile in debugger
 (setf hunchentoot:*catch-errors-p* nil)

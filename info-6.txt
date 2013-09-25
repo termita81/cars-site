@@ -20,7 +20,65 @@ vehiculul selectat - deci este posibil sa existe atribute care sa nu aiba
 valoare completata.
 
 <pre>
-
+<html>
+<head>
+<style type='text/css'>
+  .admin-container { overflow: auto; padding: 5px; width: 400px; height: 200px; background: #eee }
+</style>
+</head>
+<body>
+<!-- autovehicule -->
+Autovehicule:<br>
+<form action='/admin' method='GET'>
+<input type='text' id='vehicle' name='vehicle'>
+<input type='hidden' name='cmd' value='add-vehicle'>
+<input type='submit' value='Adauga vehicul'>
+</form>
+<div class='admin-container'>
+  <table>
+  <!-- TMPL_LOOP vehicles -->
+  <tr><td id='<!-- TMPL_VAR id -->'><a href="/admin?cmd=edit-vehicle&id=<!-- TMPL_VAR id -->"><!-- TMPL_VAR name --></a></td></tr>
+  <!-- /TMPL_LOOP -->
+  </table>
+</div>
+<br><br>
+<!-- atribute -->
+Atribute:<br>
+<form action='/admin' method='GET'>
+<input type='text' id='attribute' name='attribute'>
+<input type='hidden' name='cmd' value='add-attribute'>
+<input type='submit' value='Adauga atribut'>
+</form>
+<div class='admin-container'>
+  <table>
+  <!-- TMPL_LOOP attributes -->
+  <tr><td id='<!-- TMPL_VAR id -->'><!-- TMPL_VAR name -->: <!--TMPL_VAR att-type --></td></tr>
+  <!-- /TMPL_LOOP -->
+  </table>
+</div>
+<!-- atribute la vehicule -->
+<!-- TMPL_IF edit-vehicle -->
+<div class='admin-container' style='left: 450px; top: 50px; height: 600px; position: absolute; '>
+  <form action='admin' method=GET'>
+    <!-- TMPL_VAR edit-vehicle --><br>
+    <input type='hidden' name='cmd' value='set-attributes'>
+    <input type='hidden' name='id' value='<!--TMPL_VAR edit-vehicle-id -->'>
+    <br>
+    <table border=1>
+    <!-- TMPL_LOOP edit-vehicle-attrs -->
+    <tr>
+      <td><!-- TMPL_VAR att-name --></td>
+      <td><input type='text' name='<!--TMPL_VAR att-name -->' value='<!-- TMPL_VAR att-value -->'></td>
+    </tr>
+    <!-- /TMPL_LOOP -->
+    </table>
+    <br>
+    <input type='submit' value='Seteaza atribute'>
+  </form>
+</div>
+<!-- /TMPL_IF -->
+</body>
+</html>
 </pre>
 
 Am adaugat apoi o functie noua, GET-VEHICLE-BY-ID, care returneaza un vehicul
@@ -39,9 +97,24 @@ Se poate vedea acum ca este impartita in doua bucati: una in care proceseaza
 comenzile primite, si una in care face randarea - in cazul de fata grosul muncii
 este pregatirea listei de parametri. Ce facem cu informatia asta? momentan o
 pastram in minte, poate mai tarziu iese ceva util de aici.
+Am adaugat comenzile SET-ATTRIBUTES, EDIT-VEHICLE SI SAVE-DATA. Prima seteaza
+atributele pentru un vehicul, a doua il face editabil - adica trece prin toate
+atributele disponibile si le pune intr-un formular, completand valorile acolo 
+unde vehiculul respectiv le are. 
+SAVE-DATA salveaza "baza de date" pe disc. Pentru chestia asta am adaugat un 
+mecanism din trei functii: SERIALIZE, PERSIST-TO-DISK si LOAD-FROM-DISK. Modul
+de serializare este simplist - sunt generate apeluri catre functiile care adauga
+datele.
 
 O chestie interesanta: in loc sa mai creez lista de variabile pe care o transmit
 lui FILL-AND-PRINT-TEMPLATE folosind functia LIST, acum folosesc BACKQUOTE (`),
 al carui rol este sa returneze parametrii trimisi ne-evaluati, cu exceptia 
 cazurilor cand acestia sunt precedati de virgula (,). Combinatiile dintre ` si ,
-pot fi si imbricate, pentru distractie sporita! :)
+pot fi si imbricate, pentru distractie sporita! 
+
+Deja am inceput sa vad niste limitari la modelul de date ales, si la modul in 
+care am aranjat sursele - faptul ca tin tot codul intr-un singur fisier incepe
+sa faca mai dificila navigarea intre functii.
+
+Acum ar fi dragut sa facem in sfarsit pagina de interogare a bazei de date. Alte
+fineturi mai pot astepta.
