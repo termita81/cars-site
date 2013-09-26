@@ -108,7 +108,7 @@
     (loop for a in (get-all-attributes)
 	 do (format s "~%(add-attribute (make-instance 'attribute :name \"~a\" :id ~a :att-type '~a))"
 		    (name a)
-		    (id a)AL
+		    (id a)
 		    (att-type a)))
     (format s "~%~%; vehicule")
     (loop for v in (get-all-vehicles)
