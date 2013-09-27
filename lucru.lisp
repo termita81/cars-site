@@ -21,6 +21,7 @@
 
 
 
+
 ; incarc fisierul cu baza de date
 (load "db")
 
