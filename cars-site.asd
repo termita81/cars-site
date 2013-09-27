@@ -13,6 +13,9 @@
 
 (ql:quickload '(:hunchentoot :html-template))
 
+(defpackage :cars-site
+  (:use :cl :hunchentoot :html-template))
+
 (defsystem :cars-site
   :serial t
   :version "0.0.1"
@@ -23,5 +26,4 @@
 	       (:file "web")
 	       (:file "db")))
 
-(defpackage :cars-site
-  (:use :cl :hunchentoot :html-template))
+

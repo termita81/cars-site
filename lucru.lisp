@@ -1,8 +1,3 @@
-(ql:quickload '(:hunchentoot :html-template))
-
-(defpackage :cars-site
-    (:use :cl :hunchentoot :html-template))
-
 (in-package :cars-site)
 
 
@@ -22,21 +17,10 @@
 
 
 
-; incarc fisierul cu baza de date
-(load "db")
-
-; incarc baza de date de pe disc
-(load-from-disk)
-
-
-
 
 
 ; asta il face pe Hunchentoot sa arunce erorile in debugger
 (setf hunchentoot:*catch-errors-p* nil)
-
-; incarc fisierul cu functiile web
-(load "web")
 
 ; pornesc server-ul web, il tin minte in variabila speciala *web*
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))

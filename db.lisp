@@ -123,3 +123,6 @@
 	  (loop 
 	     for att in (slot-value vehicle 'attributes)
 	     collect (concatenate 'string (car att) ": " (cdr att) '(#\Newline)))))
+
+; incarca baza de date
+(load-from-disk)
