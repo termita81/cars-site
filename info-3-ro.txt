@@ -1,0 +1,264 @@
+Acum avem create functii care sa adauge vehicule si atribute noi, sa seteze 
+si sa preia atribute de pe vehicule. Avem chiar si o functie care sa caute 
+acele vehicule care indeplinesc anumite conditii (ma rog, atributele lor).
+Pare ca sunt multe fire pe-afara, lucru care nu ma incanta, asa ca modificam 
+pe ici pe colo.
+
+Nu vad de ce as avea nevoie de acces direct la variabilele care contin id-ul
+curent de secventa, asa ca transform definitiile de clase, inchizand peste
+variabilele respective.
+
+La fel, in mod normal nu cred ca o sa am nevoie sa accesez direct colectiile
+de obiecte (atat vehicule cat si atribute) asa ca transform si functiile 
+celelalte in inchideri peste colectii.
+
+Explicatie - daca definesc o variabila speciala cu DEFPARAMETER sau DEFVAR, 
+pot sa o accesez de oriunde din program, iar lucrul asta s-ar putea sa nu fie 
+optim. Asa ca mai bine fac variabila sa fie lexicala, o definesc intr-un LET
+si apoi in corpul LET-ului definesc cu DEFUN functiile mele. Asta o sa faca
+toate acele functii sa salveze legatura catre variabila respectiva si sa aiba 
+acces la ea, fara ca alte functii sa poata face acest lucru. Pentru convenienta
+am lasat si cate o functie care sa returneze variabila respectiva, dar functia
+respectiva NU va fi acolo cand programul este pus in productie.
+
+Functia FORMAT - ca sa mi-o fixez eu in cap si sa printam mai frumos
+Este folosita pentru a scrie diverse chestii, cred ca poate fi asemanata cu 
+printf. Primeste ca parametri:
+- destinatia
+- un sir de caractere de control
+- alte argumente interpretate cu ajutorul directivelor din parametrul 2; aceste
+argumente pot fi consumate sau nu de directive, adica, daca ne imaginam o sageata
+care indica argumentul curent, aceasta sageata poate sa avanseze sau nu in functie
+de directiva 
+
+Destinatia poate fi:
+- nil - pentru a scrie intr-un string pe care-l si returneaza
+- t - pentru a scrie in stream-ul *STANDARD-OUTPUT*, si returneaza nil
+- un stream sau un string cu pointer de umplere (fill pointer)
+
+Sirul de caractere de control este un program in limbajul FORMAT. Seamana 
+oarecum cu sirul de formatare din printf, macar ca idee daca nu si ca sintaxa. 
+Este alcatuit din caractere obisnuite, interpretate ad-literam, amestecate 
+cu directive care pot consuma din argumentele de dupa sir si care incep 
+cu tilda (~) si se termina cu un caracter care identifica directiva 
+(poate fi scris cu litera mare sau mica), iar in mijloc pot sa mai aiba 
+alti parametri prefix:
+- numere scrise in baza 10
+- v - specifica sa se foloseasca parametrul urmator din sirul de control
+- # - numara cati parametri mai sunt in sirul de control, fara sa consume din ei
+- caractere citate cu ')
+
+<pre>
+(format t "~$" pi) ==> 3.14
+(format t "~5$" pi) ==> 3.14159
+(format t "~v$" 3 pi) ==> 3.142
+(format t "~#$" pi) ==> 3.1
+</pre>
+
+Daca o directiva accepta doi parametri prefix si vrei sa-l dai doar pe al doilea, 
+pe primul il scrii ca ",".
+
+Mai exista modificatorii ":" si "@", care sunt plasati dupa parametrii oprefix
+dar inainte de caracterul de identificare al directivei si modifica modul de 
+functionare a directivei in feluri mai subtile. De exemplu, pentru directiva ~D
+care scrie numere in baza 10, ":" specifica separarea numarului in grupe 
+de cate trei, iar "@" pune semnul:
+<pre>
+(format t "~d" 1000000) ==> 1000000
+(format t "~:d" 1000000) ==> 1,000,000
+(format t "~@d" 1000000) ==> +1000000
+(format t "~:@d" 1000000) ==> +1,000,000
+</pre>
+
+Directive:
+~A - consuma un parametru si il scrie "estetic" (aesthetic), adica sirurile sunt 
+scrise fara ghilimele sau secvente escape, iar numerele intr-un mod natural.
+<pre>
+(format t "~a are ~a mere" "Ana" 3) ==> Ana are 3 mere
+</pre>
+
+~S - seamana cu A, doar ca incearca sa scrie datele a.i. sa poata fi citite inapoi 
+de reader, adica sirurile vor fi incadrate in ghilimele, simbolurile vor avea 
+numele pachetului in fata etc
+
+~% - emite linie noua
+~& - emite linie noua doar daca nu se afla la inceputul liniei
+Amandoua primesc un parametru prefix numeric care specifica numarul de linii dorit
+
+~c - emite caractere si poate sa consume doar caractere ca argument. Poate fi 
+modificata cu ":" pentru a scrie numele caracterului si cu "@" pentru a emite
+caracterul in sintaxa speciala Lisp:
+<pre>
+(format t "~c" #\Newline) ==> ; scrie doar o linie noua
+(format t "~:c" #\Newline) ==> Newline
+(format t "~@c" #\Newline) ==> #\Newline
+</pre>
+
+~D, ~X, ~O, ~B, ~R - caractere de scriere de numere intregi. Primesc modificatori:
+- : - adauga virgule
+- @ - printeaza semnul totdeauna
+si parametri prefix:
+- primul specifica latimea minima
+- al doilea specifica un caracter de umplere, implicit fiind spatiu si 
+adaugandu-se inaintea numarului
+- al treilea, folosit impreuna cu ":", specifica ce caracter sa fie separator
+- al patrulea, tot impreuna cu ":", specifica numarul de caractere pe grup
+<pre>
+(format t "~,,'.,4:@d" 10000000000) ==>  +100.0000.0000
+</pre>
+Directivele astea specifica baza in care sa fie printat numarul, 
+deci aroganta maxima ar fi:
+<pre>
+(format t "~23,15,':,'@,2:r" 10000000000) ==> ::::2L@CF@D6@FG
+</pre>
+Ha. Ha. Ha. Mestesug de smintire a mintii si rasucire a crediintei.
+Sa scrie numarul 10000000000 in baza 23, pe maxim 15 caractere umpland cu ":",
+grupand cifrele cate 2 si separandu-le cu "@". Amin!
+Deci parametrii aia se separa cu virgula, desi initial crezusem ca se inlocuiesc
+cu virgula daca nu exista. Aici e de sapat.
+
+~F, ~E, ~G, ~$ - directive de formatare pentru numere in virgula mobila
+~F - poate sa controleze numarul de zecimale dupa virgula; ii e permis 
+sa foloseasca notatia stiintifica computerizata daca numarul este suficient
+de mare sau mic.
+~E - emite numere numai in notatia stiintifica computerizata
+Primul parametru al amandurora nu stiu ce face.
+Al doilea parametru controleaza numarul de zecimale dupa virgula
+~$ - intentionata pentru printarea sumelor de bani. Fara parametri este
+echivalenta cu ~,2F.
+Primul parametru controleaza numarul de zecimale dupa virgula.
+Al doilea parametru controleaza numarul minim de cifre de printat inainte
+de virgula.
+Toate trei directivele pot primi modificatorul "@" pentru a printa
+si semnul.
+
+~R - fara baza specificata (cum am scris mai sus):
+- scrie numerele in engleza
+- cu ":" - scrie numerele in engleza, ca numerale ordinale
+- cu "@" - scrie cu cifre romane
+
+~P - pluralizeaza
+<pre>
+(format nil "file~p" 1)  ==> "file"
+(format nil "file~p" 10) ==> "files"
+(format nil "file~p" 0)  ==> "files"
+(format nil "~r file~:p" 1)  ==> "one file"
+(format nil "~r file~:p" 10) ==> "ten files"
+(format nil "~r file~:p" 0)  ==> "zero files"
+(format nil "~r famil~:@p" 1)  ==> "one family"
+(format nil "~r famil~:@p" 10) ==> "ten families"
+(format nil "~r famil~:@p" 0)  ==> "zero families"
+</pre>
+
+~( si ~) - controleaza capitalizarea textului incadrat de ele
+- fara nimic - textul complet cu litere mici
+- "@" - majuscula initiala la primul cuvant
+- ":" - majuscule initiale la toate cuvintele
+- "@:" - textul complet e cu majuscule
+<pre>
+(format nil "~(~a~)" "tHe Quick BROWN foX")   ==> "the quick brown fox"
+(format nil "~@(~a~)" "tHe Quick BROWN foX")  ==> "The quick brown fox"
+(format nil "~:(~a~)" "tHe Quick BROWN foX")  ==> "The Quick Brown Fox"
+(format nil "~:@(~a~)" "tHe Quick BROWN foX") ==> "THE QUICK BROWN FOX"
+</pre>
+
+~[ si ~] - directiva conditionala; contine clauze separate cu "~;". Functioneaza
+alegand una din clauzele interne, urmand ca acea clauza sa fie procesata 
+de FORMAT. Fara modificatori sau parametri, clauza este selectata dupa index,
+conform unui parametru consumat:
+<pre>
+(format nil "~[unu~;doi~;trei~]" 1) ==> "doi"
+</pre>
+Daca ultima clauza este "~:;" in loc de "~;" atunci in caz ca parametrul este 
+mai mare decat numarul de clauze se printeaza ultima clauza, altfel nimic.
+Se poate selecta clauza si folosind un parametru prefix, sau "#".
+<pre>
+(defparameter *list-etc*
+  "~#[NONE~;~a~;~a and ~a~:;~a, ~a~]~#[~; and ~a~:;, ~a, etc~].")
+(format nil *list-etc*)                ==> "NONE."
+(format nil *list-etc* 'a)             ==> "A."
+(format nil *list-etc* 'a 'b)          ==> "A and B."
+(format nil *list-etc* 'a 'b 'c)       ==> "A, B and C."
+(format nil *list-etc* 'a 'b 'c 'd)    ==> "A, B, C, etc."
+(format nil *list-etc* 'a 'b 'c 'd 'e) ==> "A, B, C, etc."
+</pre>
+F***! ce urat arata...
+Daca pui ":" inainte, poti sa folosesti directiva ~[ cu doar doua clauze, 
+si va consuma un singur argument, procesand prima clauza daca argumentul e NIL
+sau a doua in caz contrar.
+Folosind "@", poti avea o singura clauza si consuma un argument; daca acesta 
+din urma este non-NIL, lasa argumentul in pace si proceseaza clauza, deci 
+argumentul va fi refolosit:
+<pre>
+(format t "~@[1~] ~a" 1 2) ==> 1 1
+(format t "~@[1~] ~a" nil 2) ==> 2 ; si returneaza NIL
+(format nil "~@[x = ~a ~]~@[y = ~a~]" 10 20)   ==> "x = 10 y = 20"
+(format nil "~@[x = ~a ~]~@[y = ~a~]" 10 nil)  ==> "x = 10 "
+(format nil "~@[x = ~a ~]~@[y = ~a~]" nil 20)  ==> "y = 20"
+(format nil "~@[x = ~a ~]~@[y = ~a~]" nil nil) ==> ""
+</pre>
+
+~{ si ~} - directiva de iterare, comanda iterarea peste elementele unei liste
+sau peste liste implicita a argumentelor lui FORMAT
+Fara modificatori, consuma un argument, care trebuie sa fie lista; fiecare element
+din lista este procesat conform stringului de control dintre ~{ si ~}
+Directiva ~^ in interiorul lui ~{ si ~} specifica oprirea imediata a procesarii
+cand nu mai sunt elemente in lista
+<pre>
+(format nil "~{~a, ~}" (list 1 2 3)) ==> "1, 2, 3, "
+(format nil "~{~a~^, ~}" (list 1 2 3)) ==> "1, 2, 3"
+</pre>
+Cu modificatorul "@" ... ma rog, ma opresc, deja e criptic, dar se pare ca destul
+de capabil.
+
+~* - iti permite sa te misti prin lista de argumente
+- simplu - sare peste urmatorul argument, fara sa-l foloseasca
+- cu ":" - sare peste argumentul curent, permitand sa fie folosit din nou
+- in directiva ~{ de mai devreme, ~* se misca prin elementele unei liste
+- primeste si parametri prefix, gen numere pentru specificarea numarului de 
+argumente sarite, sau "@" pentru a specifica saltul incepand de la elementul zero.
+
+~? - ia stringuri de control de la argumentele lui FORMAT
+
+~/ - permite apelarea de functii arbitrare pentru a procesa argumentele lui FORMAT
+
+
+Daca tot am scris despre diverse chestii de "infrastructura", o sa scriu cateva 
+randuri si despre
+
+
+HUNCHENTOOT (http://weitz.de/hunchentoot/)
+
+Hunchentoot este un server de web care stie SSL si alte cateva chestii. Te lasa
+sa raspunzi la cereri HTTP in orice fel vrei tu, permitandu-ti accesul la
+header-ele HTTP. Poate folosi fire de executie (thread-uri) acolo unde acestea
+sunt suportate, prin biblioteca Bordeaux Threads. Ar trebui sa functioneze fara
+probleme pe implementari decente de Common Lisp; pe CCL, SBCL si LispWorks sigur
+merge, doar ca pe Windows este posibil sa ai nevoie de OpenSSL instalat.
+Hunchentoot se instaleaza foarte lejer cu Quicklisp, de aceea si prima linie
+din lucru.lisp:
+<pre>
+(ql:quickload '(:hunchentoot))
+</pre>
+
+Cum lucrezi cu Hunchentoot? il pornesti si apoi adaugi niste request handlere.
+In timp ce el asculta pe portul pe care il pui tu, cand primeste o cerere,
+se uita intr-o lista de functii care specifica pentru ce URL-uri raspund. 
+Daca vreuna din acele functii returneaza un handler (care este la randul sau
+o functie) atunci acest handler va fi folosit pentru a genera raspunsul catre
+client.
+
+<pre>
+(defparameter *server-web* 
+  (make-instance 'hunchentoot:easy-acceptor :port 8080))
+(start *server-web*)
+</pre>
+Am definit o variabila speciala pe care o initializez cu o instanta de acceptor
+Hunchentoot. Acest acceptor va asculta pe portul TCP 8080. O pornesc cu metoda
+start. Directorul de documente din care va servi cererile in mod implicit este
+www din directorul in care a fost instalat:
+~/quicklisp/dists/quicklisp/software/hunchentoot-####/www
+
+Daca vrei mai mult decat doar sa servesti fisiere statice poti sa extinzi 
+clasa acceptor, sa folosesti niste biblioteci de generare HTML gen CL-WHO,
+HTML-TEMPLATE, ceva biblioteci de Javascript gen Parenscript. Eu asa o sa fac.

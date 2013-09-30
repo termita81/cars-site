@@ -1,9 +1,10 @@
 (in-package :cars-site)
 
 
-(defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, nu spune nimic
+(defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, no further info provided
 (defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
-(defparameter *PASS* "somepass") ; parola de admin :)
+(defparameter *PASS* "somepass") ; admin password :)
+(load "~/cslv") ; supersedes admin password, local to machine
 (defparameter *PASSWORD-POST-PARAMETER* "pwd")
 (defparameter *SITE-ROOT* 
   (if (equalp "Linux" (software-type))
@@ -19,9 +20,9 @@
 
 
 
-; asta il face pe Hunchentoot sa arunce erorile in debugger
+; tell Hunchentoot to throw errors/conditions in debugger
 (setf hunchentoot:*catch-errors-p* nil)
 
-; pornesc server-ul web, il tin minte in variabila speciala *web*
+; start acceptor, keep a reference in the special variable *web*
 (defparameter *web* (make-instance 'easy-acceptor :port 8080))
 (start *web*)
