@@ -10,7 +10,8 @@
   (if (equalp "Linux" (software-type))
       "~/cars-site/"
       "~/Documents/GitHub/cars-site/"))
-(defparameter *db* "cars-site-db")
+(defparameter *db* "the-db")
+(defparameter *NO-LOGIN* t)
 
 (defun get-site-file (name)
   (merge-pathnames name *SITE-ROOT*))

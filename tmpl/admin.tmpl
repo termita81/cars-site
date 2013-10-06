@@ -1,7 +1,7 @@
 <html>
 <head>
 <style type='text/css'>
-  .admin-container { overflow: auto; padding: 5px; width: 400px; height: 200px; background: #eee }
+  .admin-container { overflow: auto; padding: 5px; width: 400px; height: 200px; background: #ccc }
 </style>
 </head>
 <body>
@@ -28,6 +28,11 @@ Autovehicule:<br>
 Atribute:<br>
 <form action='/admin' method='GET'>
 <input type='text' id='attribute' name='attribute'>
+<select name='att-type'>
+  <option value='1' selected='true'>string</option>
+  <option value='2'>numar</option>
+  <option value='3'>da/nu</option>
+</select>
 <input type='hidden' name='cmd' value='add-attribute'>
 <input type='submit' value='Adauga atribut'>
 </form>
@@ -50,8 +55,15 @@ Atribute:<br>
     <table border=1>
     <!-- TMPL_LOOP edit-vehicle-attrs -->
     <tr>
-      <td><!-- TMPL_VAR att-name --></td>
-      <td><input type='text' name='<!--TMPL_VAR att-name -->' value='<!-- TMPL_VAR att-value -->'></td>
+      <td style="background: #eee"><!-- TMPL_VAR att-name --></td>
+
+      <td><!-- TMPL_IF att-bool -->
+	<input type='checkbox'<!-- TMPL_IF att-checked --> checked='true'<!-- /TMPL_IF --> name='<!-- TMPL_VAR att-id -->'>
+	<!-- TMPL_ELSE -->
+	<input type='text' name='<!--TMPL_VAR att-id -->' value='<!-- TMPL_VAR att-value -->'>
+	<!-- /TMPL_IF -->
+      </td>
+
     </tr>
     <!-- /TMPL_LOOP -->
     </table>

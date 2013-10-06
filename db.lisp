@@ -25,7 +25,10 @@
        collect a))
   (defun get-all-attributes ()
     "Numai pentru debug"
-    all-attributes))
+    all-attributes)
+  (defun find-attribute-by-id (id)
+    (find id all-attributes 
+	  :test #'(lambda (to-find item) (= (id item) to-find)))))
 
 
 ; vehicule
@@ -47,18 +50,18 @@
     (when (<= vehicle-id-seq (id vehicle))
       (setf vehicle-id-seq (1+ (id vehicle))))
     vehicle)
-  (defun set-attribute-on-vehicle (vehicle-id att-name att-value)
-    (if (find-attribute-by-name att-name)
+  (defun set-attribute-on-vehicle (vehicle-id att-id att-value)
+    (if (find-attribute-by-id att-id)
 	(let ((vehicle (find-vehicle-by-id vehicle-id)))
 	  (when vehicle
 	    (setf 
 	     (slot-value vehicle 'attributes)
-	     (acons att-name att-value (slot-value vehicle 'attributes)))))
+	     (acons att-id att-value (slot-value vehicle 'attributes)))))
 	(error "Nu exista acest atribut!")))
-  (defun get-attribute-on-vehicle (vehicle-id att-name)
+  (defun get-attribute-on-vehicle (vehicle-id att-id)
     (let* 
 	((vehicle (get-vehicle-by-id vehicle-id))
-	 (att (assoc att-name (slot-value vehicle 'attributes) :test #'string-equal)))
+	 (att (assoc att-id (slot-value vehicle 'attributes) :test #'=)))
       (if att
 	  (cdr att)
 	  nil)))
@@ -101,10 +104,10 @@
     (loop for v in (get-all-vehicles)
 	 do (loop for a in (get-all-attributes)
 	       do (let* ((id (id v))
-			 (name (name a))
-			 (val (get-attribute-on-vehicle id name)))
+			 (att-id (id a))
+			 (val (get-attribute-on-vehicle id att-id)))
 		    (when (and val (not (equal "NIL" val)))
-		      (format s "~%(set-attribute-on-vehicle ~a \"~a\" \"~a\")" id name val)))))
+		      (format s "~%(set-attribute-on-vehicle ~a ~a \"~a\")" id att-id val)))))
     s))
 
 (defun persist-to-disk ()

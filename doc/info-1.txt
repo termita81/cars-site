@@ -1,52 +1,60 @@
-Voi incepe o serie de articole in care voi povesti cum lucrez in Common Lisp
-la un site, un proiect personal. Intentia este sa scriu macar un articol pe 
-saptamana. Pentru setarea mediului de lucru Common Lisp vezi aici: 
+I will start a series of posts where I will show how I use Common Lisp to 
+build a site as a personal project. My intention is to write at least a post
+every week. For setting up the environment to work with Common Lisp check
+out this article: 
 http://razvanpopa.blogspot.ro/2013/01/instalare-clozure-common-lisp-pe.html 
-cum se seteaza pe un Raspberry Pi si poti extrapola pentru un PC obisnuit.
+about setting it on a Raspberry Pi, it should be about the same to do it on
+a regular PC or laptop.
 
-In primul rand, trebuie sa fie instalate Emacs, Quicklisp si o implementare 
-de Common Lisp - eu folosesc Clozure Common Lisp (CCL).
+First you need to install Emacs, Quicklisp and a Common Lisp implementation
+- I'm using Clozure Common Lisp (CCL).
 
-Asadar, pornesc Emacs, M-x slime <RET>, si deschid fisierul lucru.lisp 
-(C-x C-f lucru.lisp <RET>).
-Mini-terminologie Emacs:
-- ceea ce in mod normal se numeste window/fereastra, in Emacs este frame, 
-si contine ferestre Emacs, bara de meniu si alte obiecte de GUI
-- in acest frame poti sa ai mai multe ferestre Emacs
-- in fiecare fereastra Emacs editezi un singur buffer, care poate sa fie 
-continutul unui fisier de pe disc sau pur si simplu niste text
-Deci Emacs are un frame mare, in care pot fi vizibile mai multe ferestre.
+When I start a session I start up Emacs, type M-x slime <RET> to start and 
+connect to CCL, and open the lucru.lisp (lucru means work in Romanian, name
+your file as you wish) using the following shortcut: C-x C-f lucru.lisp <RET>.
+Mini-Emacs-dictionary:
+- what one would usually call window is called a frame in Emacs, it contains
+the whole Emacs application, menu bar and window title
+- in this frame there can be more than one Emacs windows
+- in each Emacs window you edit a single buffer, which can be the content of
+a file on a disk or simply some text, unsaved on the disk
+So Emacs has a big frame, where you can see more windows.
+In Emacs "C" stands for Control key, and "M" for "Alt". Apple keyboards may
+look different but I'm not using one so you'll have to search the net to
+find the correct mappings.
 
-Cu Emacs lucrez in felul urmator: C-x 1 pe o fereastra o face sa ocupe tot 
-frame-ul Emacs, apoi C-x 2 sau C-x 3 imparte fereastra in 2 pe orizontala, 
-respectiv pe verticala. In una din ferestre acum pot sa apas C-x <stanga> 
-sau C-x <dreapta> pentru a cicla intre bufferele deschise. Astfel, imi pastrez 
-REPL-ul Common Lisp intr-unul din buffere si in celalalt vad fisierul deschis, 
-in cazul de fata lucru.lisp. Intre cele doua ferestre ma misc cu C-x o. 
-In fereastra non-REPL evaluez expresii cu C-x e la finalul expresiei. 
-C-M k sterge expresia curenta. 
-C-M e si C-M a se misca intre expresii, adica inainte si inapoi. 
-C-a si C-e muta cursorul la inceputul, respectiv la sfarsitul liniei curente.
-Daca apare o eroare (controlul se muta intr-o fereastra cu o lista de optiuni 
-numerotate - restart-uri, urmata de o lista de apeluri de functii numerotate 
-in sens invers - stiva de apeluri) cea mai usoara cale de a scapa de ea este 
-sa apesi q (quit).
+Some more keyboard shortcuts for Emacs: C-x 1 in a window to make it be as 
+large as the whole Emacs frame, then C-x 2 or C-x 3 to split it horizontally
+or vertically. In one of the windows I cand press C-x <left arrow> or 
+C-x <right arrow> to cycle between open buffers. This way, I have the CCL REPL
+in one of the buffers and in the other the working file, namely lucru.lisp.
+I switch windows using cu C-x o. In the non-REPL window I can evaluate 
+expressions by pressing C-x e when the cursor is at the end of the expression.
+C-M k deletes the current S-expression.
+C-M e and C-M a let you move back and forth between S-expressions. 
+C-a and C-e move the cursor at the beginning or at the end of the current line.
+If there should appear an error (focus is moved to a window with a list of
+options with numbers to their left - the restarts - followed by a list of 
+calls also with numbers to their left in decreasing order - the call stack) 
+the easiest way out is to press q (quit) in that window.
 
 
-Carti despre Common Lisp, disponibile pe net:
-- "Practical Common Lisp" de Peter Seibel, carte foarte buna pentru incepatori 
-in care se explica aspecte teoretice sir si arata si punerea lor in aplicare; 
-gratuita la http://gigamonkeys.com/book/; [PCL]
-- "On Lisp" de Paul Graham, carte dedicata in mare parte studiului macrourilor,
-necesita o minima pregatire; http://www.paulgraham.com/onlisptext.html; [OL]
-- "Let Over Lambda" de Doug Hoyte, in care sunt explicate alte tehnici de 
-macrouri; http://letoverlambda.com/index.cl/toc; [LOL]
+Common Lisp books, available on the web:
+- "Practical Common Lisp" by Peter Seibel, really good book for beginners and
+not only; Peter explains theoretical aspects and also shows how one can use 
+them practically; free at http://gigamonkeys.com/book/; [PCL]
+- "On Lisp" by Paul Graham, dedicated to a large extent to studying macros;
+it does require a minimum of CL knowledge; 
+http://www.paulgraham.com/onlisptext.html; [OL]
+- "Let Over Lambda" by Doug Hoyte, explains other macro techniques; 
+http://letoverlambda.com/index.cl/toc; [LOL]
+- "The Common Lisp HyperSpec", "Successful Lisp" etc
 
-OK, sa trecem la treaba!
+OK, let's get to work!
 
----------------------------
-Ce vreau sa obtin?
----------------------------
+----------------------------
+What is it I want to create?
+----------------------------
 Vreau sa fac un site despre masini. In el vei putea sa faci diverse cautari 
 despre masini noi, dupa diverse criterii gen capacitate cilindrica, numar de 
 usi sau tip combustibil, ideea de baza fiind sa ajut pe cineva care cauta o 

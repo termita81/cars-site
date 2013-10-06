@@ -1,12 +1,15 @@
 (in-package  :cars-site)
 
 
+(defun get-template-file (name)
+  (merge-pathnames name (merge-pathnames "tmpl/" *SITE-ROOT*)))
+
 
 ; pentru debug: salveaza ultimul obiect REQUEST
 (defparameter *LAST-REQUEST* nil)
 
 (defun is-logged-in ()
-  (cookie-in *COOKIE-NAME*))
+  (or *NO-LOGIN* (cookie-in *COOKIE-NAME*)))
 
 (defun web-login ()
   (setf *LAST-REQUEST* *REQUEST*)
@@ -23,12 +26,17 @@
 		(setf wrong t)))
 	(with-output-to-string (s)
 	  (html-template:fill-and-print-template 
-	   (get-site-file "login.tmpl") 
+	   (get-template-file "login.tmpl") 
 	   (list :wrong-password wrong) 
 	   :stream s)
 	  s))))
 
 (pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
+
+(defun att-type-from-int (the-int)
+  (cond ((= the-int 2) 'number)
+	((= the-int 3) 'bool)
+	(t 'string)))
 
 (defun web-admin ()
   (setf *LAST-REQUEST* *REQUEST*)
@@ -42,23 +50,29 @@
        (let ((name (get-parameter "vehicle")))
 	 (add-vehicle (make-instance 'vehicle :name name))))
       ((equal cmd "add-attribute")
-       (let ((name (get-parameter "attribute")))
-	 (add-attribute (make-instance 'attribute :name name))))
+       (let ((name (get-parameter "attribute"))
+	     (att-type (att-type-from-int (parse-integer (get-parameter "att-type")))))
+	 (add-attribute (make-instance 'attribute :name name :att-type att-type))))
       ((equal cmd "edit-vehicle")
        (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id")))))
       ((equal cmd "set-attributes")
        (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id"))))       
        (loop for att in (get-all-attributes)
+	  for id-att = (id att)
+	  for value = 
+	    (or (get-parameter (write-to-string id-att))
+		"off")
+	  when value
 	  do (set-attribute-on-vehicle 
 	      (parse-integer (get-parameter "id")) 
-	      (name att) 
-	      (get-parameter (name att)))))
+	      id-att
+	      value)))
       ((equal cmd "save-data")
        (persist-to-disk))
       (t nil))
     (with-output-to-string (s)
       (html-template:fill-and-print-template
-       (get-site-file "admin.tmpl")
+       (get-template-file "admin.tmpl")
        `(:vehicles 
 	 ,(mapcar #'(lambda (x) 
 		      `(:id ,(id x) :name ,(name x))) 
@@ -72,12 +86,18 @@
 		   :edit-vehicle-id ,(id edit-vehicle)
 		   :edit-vehicle-attrs
 		   ,(mapcar #'(lambda (x)
-			       `(:att-name ,(name x)
-					   :att-value ,(get-attribute-on-vehicle (id edit-vehicle) (name x))))
+				(let ((val (get-attribute-on-vehicle (id edit-vehicle) (id x))))
+				  `(:att-id ,(id x)
+				    :att-name ,(name x)
+				    :att-bool ,(eq 'bool (att-type x))
+				    :att-checked ,(and (eq 'bool (att-type x)) (string-equal val "on"))
+				    :att-value ,val)))
 			   (get-all-attributes))))
 	 )
        :stream s)
        s)))
+
+
 
 (pushnew (create-prefix-dispatcher "/admin" 'web-admin) *dispatch-table*)
 
@@ -93,7 +113,7 @@
 (defun root-handler ()
   (with-output-to-string (s)
     (html-template:fill-and-print-template
-     (get-site-file "index.tmpl")
+     (get-template-file "index.tmpl")
      `()
      :stream s)
     s))
