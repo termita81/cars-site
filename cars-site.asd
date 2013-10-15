@@ -22,7 +22,8 @@
   :description "Some new cars choosing site"
   :depends-on (:hunchentoot
 	       :html-template)
-  :components ((:file "lucru")
+  :components ((:file "start")
+	       (:file "util")
 	       (:file "web")
 	       (:file "db")))
 

@@ -46,12 +46,13 @@ Atribute:<br>
 
 <!-- atribute la vehicule -->
 <!-- TMPL_IF edit-vehicle -->
-<div class='admin-container' style='left: 450px; top: 50px; height: 600px; position: absolute; '>
+<div style='left: 450px; top: 50px; height: 600px; position: absolute; '>
   <form action='admin' method=GET'>
     <!-- TMPL_VAR edit-vehicle --><br>
     <input type='hidden' name='cmd' value='set-attributes'>
     <input type='hidden' name='id' value='<!--TMPL_VAR edit-vehicle-id -->'>
     <br>
+    <div class='admin-container' style="height: 500px; ">
     <table border=1>
     <!-- TMPL_LOOP edit-vehicle-attrs -->
     <tr>
@@ -67,6 +68,7 @@ Atribute:<br>
     </tr>
     <!-- /TMPL_LOOP -->
     </table>
+    </div>
     <br>
     <input type='submit' value='Seteaza atribute'>
   </form>

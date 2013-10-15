@@ -1,4 +1,5 @@
-(in-package :cars-site)
+(eval-when (:compile-toplevel :load-toplevel :execute)
+  (in-package :cars-site))
 
 
 (defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, no further info provided
@@ -25,5 +26,7 @@
 (setf hunchentoot:*catch-errors-p* nil)
 
 ; start acceptor, keep a reference in the special variable *web*
-(defparameter *web* (make-instance 'easy-acceptor :port 8080))
+(defparameter *web* (make-instance 'easy-acceptor :port 8080 :document-root *SITE-ROOT*))
 (start *web*)
+
+; (stop *web*)

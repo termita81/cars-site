@@ -9,12 +9,12 @@
      (att-type :initarg :att-type :initform 'string :accessor att-type)))
   (defun find-attribute-by-name (name)
     (find name all-attributes 
-	  :test #'(lambda (to-find item) (string= (name item) to-find))))
+	  :test #'string-equal :key #'name))
   (defun add-attribute (att)
     (if (find-attribute-by-name (name att))
 	(error "Atributul cu acest nume este deja introdus")
 	(push att all-attributes))
-    (when (<= attribute-id-seq (id att))
+    (when (< attribute-id-seq (id att))
       (setf attribute-id-seq (1+ (id att))))
     att)
   (defun search-attribute-by-name (partial-name)
@@ -28,7 +28,7 @@
     all-attributes)
   (defun find-attribute-by-id (id)
     (find id all-attributes 
-	  :test #'(lambda (to-find item) (= (id item) to-find)))))
+	  :test #'= :key #'id)))
 
 
 ; vehicule
@@ -42,12 +42,12 @@
     (find i all-vehicles :test #'(lambda (to-find y) (= (id y) to-find))))
   (defun find-vehicle-by-name (name)
     (find name all-vehicles 
-	  :test #'(lambda (to-find item) (string= (name item) to-find))))
+	  :test #'string-equal :key #'name))
   (defun add-vehicle (vehicle)
     (if (find-vehicle-by-name (name vehicle))
 	(error "Vehiculul cu acest nume este deja introdus!")
 	(push vehicle all-vehicles))
-    (when (<= vehicle-id-seq (id vehicle))
+    (when (< vehicle-id-seq (id vehicle))
       (setf vehicle-id-seq (1+ (id vehicle))))
     vehicle)
   (defun set-attribute-on-vehicle (vehicle-id att-id att-value)

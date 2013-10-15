@@ -1,12 +1,99 @@
-<html>
-  <head>
-    <title>CARS-SITE (cel mai tare site posibil)</title>
-    <script language="javascript">
+
+<html><head><title>Site masini</title>
+    
+
+<style href="/css/web.css" rel="stylesheet" type="text/css"/>
+<style type="text/css">
+  .debug { border: 0px dotted red; }
+  .containers { padding: 2px; margin: 2px; }
+  #top-menu li { display: inline; padding: 4px; }
+  h3 { margin: .5em .2em .2em .2em; }
+  div { border: 1px dotted red; }
+</style>
+</head>
+<body style="margin: 0; ">
+
+<div style="margin-top: 0; background: #ddd; font-family: sans-serif; padding: 10px; ">
+  <div style="background: #ddd; padding: 15px; float: left; border-radius: 10px; ">
+    <img src="masina.png" width="100" height="60" />
+  </div>
+  <div style="color: #777; float: left; font-size: 40px; padding: 30px 20px; ">    
+    Alege o masina noua
+  </div>  
+  <!--div style="float: right; ">
+      <ul id="top-menu">
+	<li><a href="#ceva">ceva</a></li>
+	<li><a href="#ceva">ceva</a></li>
+	<li><a href="#ceva">ceva</a></li>
+      </ul>
+  </div-->  
+</div>
+
+<div style="height: 120px; ">&nbsp;</div>
+
+<div id="main" class="debug" style="margin: 1em ; background: #EEE; padding: 5px; min-height: 14em; ">
+
+  <h3>Cauta:</h3>
+    <div id="selectors" class="debug containers">
+      <div style="float: left;">
+	<input type="text" value="motor" />
+	<input type="button" value="Cauta"/>
+      </div>
+      <div style="float: right; ">
+	<input type="text" value="1.470" />
+	<input type="text" value="1.520" />
+	<input type="button" value="+"/>
+      </div>&nbsp;
+      <div id="attributes" class="debug containers" style="clear: both; margin-top: 20px; min-height: 2em; background: #f2f2f2; padding: 5px; border: 1px dotted #888; box-shadow: inset 0px 0px 6px #ddd; ">
+	a
+      </div>
+    </div>
+l-
+  <h3>Modele gasite:</h3>
+  <div id="results" class="debug containers" style="min-height: 6em; ">
+    <table border=1 cellspacing=0 cellpadding=2 width="100%">
+      <tr>
+	<td>Dacia Duster 1.5 dci 4x4 Ambiance rosu, pachet securitate</td>
+	<td>17.200 EUR</td>
+      </tr>
+      <tr>
+	<td>Skoda Fabia 1.6 TDI rosu</td>
+	<td>14.000 EUR</td>
+      </tr>
+      <tr>
+	<td>Duster 1.5 dci 4x4 Ambiance rosu, pachet securitate</td>
+	<td>17.200 EUR</td>
+      </tr>
+      <tr>
+	<td>Duster 1.5 dci 4x4 Ambiance rosu, pachet securitate</td>
+	<td>17.200 EUR</td>
+      </tr>
+      <tr>
+	<td>Duster 1.5 dci 4x4 Ambiance rosu, pachet securitate</td>
+	<td>17.200 EUR</td>
+      </tr>
+    </table>
+  </div>
+</div>
 
 
+<div style="background: #DDD; ">
+&copy; Io 2013
+</div>
+
+
+
+
+
+
+
+
+
+    <script type="text/javascript" src="/js/jquery.js"></script>
+    <script type="text/javascript">
+      var attributes = new Array();
     </script>
-  </head>
-  <body onload="ceva();">
-    Vine si restul
-  </body>
-</html>
+
+</body></html>
+
+

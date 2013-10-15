@@ -11,8 +11,19 @@
 (defun is-logged-in ()
   (or *NO-LOGIN* (cookie-in *COOKIE-NAME*)))
 
-(defun web-login ()
-  (setf *LAST-REQUEST* *REQUEST*)
+(defmacro def-route (prefix (&rest args) &body body)
+  (let ((gen-symbol (gensym)))
+    `(let ((,gen-symbol (format nil "WEB-~@:(~a~)" ',prefix)))
+       (progn
+	 (defun ,gen-symbol ,args
+	   (setf *LAST-REQUEST* *REQUEST*)
+	   ,@body)
+	 (pushnew (create-prefix-dispatcher 
+		   (format nil "/~(~a~)" ',prefix) 
+		   ',gen-symbol) 
+		  *dispatch-table*)))))
+
+(def-route login () 
   (if (is-logged-in)
       (redirect "/")
       (let ((pass (post-parameter *PASSWORD-POST-PARAMETER*))
@@ -31,28 +42,27 @@
 	   :stream s)
 	  s))))
 
-(pushnew (create-prefix-dispatcher "/login" 'web-login) *dispatch-table*)
 
-(defun att-type-from-int (the-int)
-  (cond ((= the-int 2) 'number)
-	((= the-int 3) 'bool)
-	(t 'string)))
+(defun cmd-add-vehicle ()
+  (let ((name (get-parameter "vehicle")))
+	 (add-vehicle (make-instance 'vehicle :name name))))
 
-(defun web-admin ()
-  (setf *LAST-REQUEST* *REQUEST*)
+(defun cmd-add-attribute ()
+  (let ((name (get-parameter "attribute"))
+	     (att-type (att-type-from-int (parse-integer (get-parameter "att-type")))))
+	 (add-attribute (make-instance 'attribute :name name :att-type att-type))))
+
+(def-route admin ()
   (when (not (is-logged-in))
-      (redirect "/login"))
+    (redirect "/login"))
   (let ((cmd (or (get-parameter "cmd")
-		  (post-parameter "cmd")))
+		 (post-parameter "cmd")))
 	(edit-vehicle))
     (cond
       ((equal cmd "add-vehicle")
-       (let ((name (get-parameter "vehicle")))
-	 (add-vehicle (make-instance 'vehicle :name name))))
+       (cmd-add-vehicle))
       ((equal cmd "add-attribute")
-       (let ((name (get-parameter "attribute"))
-	     (att-type (att-type-from-int (parse-integer (get-parameter "att-type")))))
-	 (add-attribute (make-instance 'attribute :name name :att-type att-type))))
+       (cmd-add-attribute))
       ((equal cmd "edit-vehicle")
        (setf edit-vehicle (get-vehicle-by-id (parse-integer (get-parameter "id")))))
       ((equal cmd "set-attributes")
@@ -83,23 +93,20 @@
 		  (get-all-attributes))
 	 ,@(when edit-vehicle		 
 		 `(:edit-vehicle ,(name edit-vehicle)
-		   :edit-vehicle-id ,(id edit-vehicle)
-		   :edit-vehicle-attrs
-		   ,(mapcar #'(lambda (x)
+				 :edit-vehicle-id ,(id edit-vehicle)
+				 :edit-vehicle-attrs
+				 ,(mapcar #'(lambda (x)
 				(let ((val (get-attribute-on-vehicle (id edit-vehicle) (id x))))
 				  `(:att-id ,(id x)
-				    :att-name ,(name x)
-				    :att-bool ,(eq 'bool (att-type x))
-				    :att-checked ,(and (eq 'bool (att-type x)) (string-equal val "on"))
-				    :att-value ,val)))
-			   (get-all-attributes))))
+					    :att-name ,(name x)
+					    :att-bool ,(eq 'bool (att-type x))
+					    :att-checked ,(and (eq 'bool (att-type x)) (string-equal val "on"))
+					    :att-value ,val)))
+					  (get-all-attributes))))
 	 )
        :stream s)
-       s)))
+      s)))
 
-
-
-(pushnew (create-prefix-dispatcher "/admin" 'web-admin) *dispatch-table*)
 
 ; mecanism... oarecum indoielnic
 ; care sa trateze "/"
@@ -114,7 +121,7 @@
   (with-output-to-string (s)
     (html-template:fill-and-print-template
      (get-template-file "index.tmpl")
-     `()
+     `(:admin ,(is-logged-in))
      :stream s)
     s))
 
@@ -123,3 +130,10 @@
     #'root-handler))
 
 (pushnew 'root-dispatcher *dispatch-table*)
+
+
+(def-route attributes ()
+  (with-output-to-string (s)
+    (loop for a in (get-all-attributes)
+	 do (format s "{name: '~a', id: '~a', att_type: '~a'}," (name a) (id a) (att-type a)))
+    s))
