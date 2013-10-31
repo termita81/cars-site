@@ -5,7 +5,7 @@
 (defparameter *COOKIE-NAME* "ebwuoeir") ; abstract, no further info provided
 (defparameter *COOKIE-VALABILITY* (* 60 60)) ; 1h
 (defparameter *PASS* "somepass") ; admin password :)
-(load "~/cslv") ; supersedes admin password, local to machine
+(load "~/cslv") ; cars-site local values - supersedes admin password, local to machine
 (defparameter *PASSWORD-POST-PARAMETER* "pwd")
 (defparameter *SITE-ROOT* 
   (if (equalp "Linux" (software-type))

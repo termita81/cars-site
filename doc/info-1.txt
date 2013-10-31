@@ -39,7 +39,7 @@ calls also with numbers to their left in decreasing order - the call stack)
 the easiest way out is to press q (quit) in that window.
 
 
-Common Lisp books, available on the web:
+Common Lisp books available on the web:
 - "Practical Common Lisp" by Peter Seibel, really good book for beginners and
 not only; Peter explains theoretical aspects and also shows how one can use 
 them practically; free at http://gigamonkeys.com/book/; [PCL]

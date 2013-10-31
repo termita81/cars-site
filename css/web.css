@@ -1,0 +1,9 @@
+span.selected-span {
+    padding: 2px;
+    border-radius: 3px;
+    background-color: #fec; 
+    margin: 2px;
+    border: 2px dotted #982;
+    display: block;
+    max-width: 200px;
+}

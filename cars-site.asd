@@ -11,10 +11,10 @@
 
 (in-package :cars-site-asd)
 
-(ql:quickload '(:hunchentoot :html-template))
+(ql:quickload '(:hunchentoot :html-template :cl-json))
 
 (defpackage :cars-site
-  (:use :cl :hunchentoot :html-template))
+  (:use :cl :hunchentoot :html-template :cl-json))
 
 (defsystem :cars-site
   :serial t

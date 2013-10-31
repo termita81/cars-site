@@ -3,25 +3,25 @@
 
 (defun get-template-file (name)
   (merge-pathnames name (merge-pathnames "tmpl/" *SITE-ROOT*)))
-
-
-; pentru debug: salveaza ultimul obiect REQUEST
+ 
+; pentru debug: stocheaza ultimul obiect REQUEST
 (defparameter *LAST-REQUEST* nil)
 
 (defun is-logged-in ()
   (or *NO-LOGIN* (cookie-in *COOKIE-NAME*)))
 
 (defmacro def-route (prefix (&rest args) &body body)
-  (let ((gen-symbol (gensym)))
-    `(let ((,gen-symbol (format nil "WEB-~@:(~a~)" ',prefix)))
-       (progn
-	 (defun ,gen-symbol ,args
-	   (setf *LAST-REQUEST* *REQUEST*)
-	   ,@body)
-	 (pushnew (create-prefix-dispatcher 
-		   (format nil "/~(~a~)" ',prefix) 
-		   ',gen-symbol) 
-		  *dispatch-table*)))))
+  (let ((name (intern (format nil "WEB-~@:(~a~)" prefix))))
+    `(progn
+       (defun ,name ,args
+	 (setf *LAST-REQUEST* *REQUEST*)
+	 ,@body)
+       ;; de observat ca apeluri repetate la def-route cu acelasi prefix
+       ;; vor adauga degeaba intrari noi in *dispatch-table*				      
+       (pushnew (create-prefix-dispatcher 
+		 (format nil "/~(~a~)" ',prefix) 
+		 ',name) 
+		*dispatch-table*))))
 
 (def-route login () 
   (if (is-logged-in)
@@ -131,9 +131,18 @@
 
 (pushnew 'root-dispatcher *dispatch-table*)
 
-
 (def-route attributes ()
-  (with-output-to-string (s)
-    (loop for a in (get-all-attributes)
-	 do (format s "{name: '~a', id: '~a', att_type: '~a'}," (name a) (id a) (att-type a)))
-    s))
+  (let ((term (or (get-parameter "term") "")))
+    (with-output-to-string (s)
+      (jsonify
+       (remove-if-not 
+	#'(lambda (x) (search term (name x) :test #'string-equal)) 
+	(get-all-attributes))
+       s)
+      s)))
+
+(defun jsonify (object stream)
+  (if (null object)
+      "[]"
+      (encode-json object stream)))
+
